@@ -48,4 +48,6 @@ app-example
 .env.test.local
 .env.production.local
 
-scripts/poc/test-audio/
+*.mp3
+*.m4a
+*.wav
