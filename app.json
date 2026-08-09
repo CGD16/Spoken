@@ -9,6 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Spoken benötigt Mikrofonzugriff, um deine Sprachnotizen aufzunehmen."
+      },
       "supportsTablet": true
     },
     "android": {
@@ -38,7 +41,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
