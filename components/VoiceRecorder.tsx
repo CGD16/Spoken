@@ -1,6 +1,6 @@
 // components/VoiceRecorder.tsx
 import { useEffect } from 'react';
-import { View, Button, Alert, StyleSheet } from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 import {
   useAudioRecorder,
   useAudioRecorderState,
@@ -19,10 +19,7 @@ export default function VoiceRecorder({ onRecordingComplete }: Props) {
 
   useEffect(() => {
     (async () => {
-      const status = await AudioModule.requestRecordingPermissionsAsync();
-      if (!status.granted) {
-        Alert.alert('Mikrofon-Zugriff benötigt', 'Bitte erlaube den Mikrofonzugriff in den Einstellungen.');
-      }
+      await AudioModule.requestRecordingPermissionsAsync();
       await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
     })();
   }, []);
@@ -40,15 +37,31 @@ export default function VoiceRecorder({ onRecordingComplete }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Button
-        title={recorderState.isRecording ? '⏹ Aufnahme stoppen' : '🎤 Aufnahme starten'}
-        onPress={recorderState.isRecording ? stopRecording : startRecording}
-      />
-    </View>
+    <Pressable
+      style={[styles.fab, recorderState.isRecording && styles.fabRecording]}
+      onPress={recorderState.isRecording ? stopRecording : startRecording}
+    >
+      <Text style={styles.icon}>{recorderState.isRecording ? '⏹' : '🎤'}</Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', padding: 20 },
+  fab: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#16a596',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  fabRecording: {
+    backgroundColor: '#d9534f',
+  },
+  icon: { fontSize: 26 },
 });

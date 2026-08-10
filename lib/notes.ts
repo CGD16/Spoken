@@ -1,6 +1,6 @@
 // lib/notes.ts
-import { supabase } from './supabase';
 import * as FileSystem from 'expo-file-system/legacy';
+import { supabase } from './supabase';
 
 export async function uploadAudioAndCreateNote(localUri: string) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -25,6 +25,42 @@ export async function uploadAudioAndCreateNote(localUri: string) {
 
   if (insertError) throw insertError;
   return noteData;
+}
+
+export async function uploadAudioAndProcessNote(
+  localUri: string,
+  mode: string,
+  customInstruction?: string
+) {
+  const note = await uploadAudioAndCreateNote(localUri);
+  const { data, error } = await supabase.functions.invoke('process-note', {
+    body: { noteId: note.id, mode, customInstruction },
+  });
+  if (error) throw error;
+  return data.result;
+}
+
+// Für 3.4: bestehende (schon hochgeladene) Notiz erneut verarbeiten, z. B. wenn
+// der User im Drei-Punkte-Menü einen anderen Modus wählt als beim ersten Mal
+export async function processNote(
+  noteId: string,
+  mode: string,
+  customInstruction?: string
+) {
+  const { data, error } = await supabase.functions.invoke('process-note', {
+    body: { noteId, mode, customInstruction },
+  });
+  if (error) throw error;
+  return data.result;
+}
+
+// Für 3.4b: erzeugt eine zeitlich begrenzte, abspielbare URL für eine private Audio-Datei
+export async function getAudioSignedUrl(audioPath: string) {
+  const { data, error } = await supabase.storage
+    .from('voice-notes')
+    .createSignedUrl(audioPath, 3600); // 1 Stunde gültig
+  if (error) throw error;
+  return data.signedUrl;
 }
 
 // Hilfsfunktion: Base64 zu ArrayBuffer (für den Storage-Upload benötigt)
