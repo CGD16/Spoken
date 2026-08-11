@@ -1,19 +1,36 @@
 // lib/notes.ts
-import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from './supabase';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
 
 export async function uploadAudioAndCreateNote(localUri: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Nicht eingeloggt');
 
-  const fileName = `${user.id}/${Date.now()}.m4a`;
-  const fileContent = await FileSystem.readAsStringAsync(localUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  // Web und Handy liefern die Aufnahme in unterschiedlichen Formaten:
+  // Handy: file://-Pfad, über expo-file-system als Base64 lesbar
+  // Web: blob:-URL, expo-file-system unterstützt das nicht – hier direkt per fetch() als Blob laden
+  let fileData: Blob | ArrayBuffer;
+  let ext = 'm4a';
+  let contentType = 'audio/m4a';
+
+  if (Platform.OS === 'web') {
+    const response = await fetch(localUri);
+    fileData = await response.blob();
+    contentType = (fileData as Blob).type || 'audio/webm';
+    ext = contentType.includes('webm') ? 'webm' : 'm4a';
+  } else {
+    const fileContent = await FileSystem.readAsStringAsync(localUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    fileData = decode(fileContent);
+  }
+
+  const fileName = `${user.id}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from('voice-notes')
-    .upload(fileName, decode(fileContent), { contentType: 'audio/m4a' });
+    .upload(fileName, fileData, { contentType });
 
   if (uploadError) throw uploadError;
 
@@ -63,7 +80,7 @@ export async function getAudioSignedUrl(audioPath: string) {
   return data.signedUrl;
 }
 
-// Hilfsfunktion: Base64 zu ArrayBuffer (für den Storage-Upload benötigt)
+// Hilfsfunktion: Base64 zu ArrayBuffer (nur für den nativen Pfad benötigt)
 function decode(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);

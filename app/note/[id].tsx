@@ -1,10 +1,16 @@
 // app/note/[id].tsx
-import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { supabase } from '@/lib/supabase';
-import { getAudioSignedUrl } from '@/lib/notes';
-import AudioPlayer from '@/components/AudioPlayer';
+import AudioPlayer from "@/components/AudioPlayer";
+import { getAudioSignedUrl } from "@/lib/notes";
+import { supabase } from "@/lib/supabase";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function NoteDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -14,9 +20,9 @@ export default function NoteDetailScreen() {
 
   useEffect(() => {
     supabase
-      .from('notes')
-      .select('*')
-      .eq('id', id)
+      .from("notes")
+      .select("*")
+      .eq("id", id)
       .single()
       .then(({ data }) => {
         setNote(data);
@@ -46,11 +52,13 @@ export default function NoteDetailScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <AudioPlayer uri={audioUrl} />
-      <Text style={styles.title}>{note.title ?? 'Unbenannte Notiz'}</Text>
+      <Text style={styles.title}>{note.title ?? "Unbenannte Notiz"}</Text>
       <Text style={styles.meta}>
-        {new Date(note.created_at).toLocaleString('de-DE')} · {note.status}
+        {new Date(note.created_at).toLocaleString("de-DE")} · {note.status}
       </Text>
-      {note.tags?.length > 0 && <Text style={styles.tags}>{note.tags.join(' · ')}</Text>}
+      {note.tags?.length > 0 && (
+        <Text style={styles.tags}>{note.tags.join(" · ")}</Text>
+      )}
 
       {note.processed_text && (
         <View style={styles.section}>
@@ -71,12 +79,22 @@ export default function NoteDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 12 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  meta: { fontSize: 13, color: '#888' },
-  tags: { fontSize: 13, color: '#2f95dc' },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  title: { fontSize: 24, fontWeight: "bold" },
+  meta: { fontSize: 13, color: "#00c6fd" },
+  tags: { fontSize: 13, color: "#2f95dc" },
   section: { marginTop: 16, gap: 6 },
-  sectionLabel: { fontSize: 13, fontWeight: '600', color: '#888', textTransform: 'uppercase' },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#888",
+    textTransform: "uppercase",
+  },
   body: { fontSize: 16, lineHeight: 22 },
-  bodySecondary: { fontSize: 14, lineHeight: 20, color: '#666', fontStyle: 'italic' },
+  bodySecondary: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#666",
+    fontStyle: "italic",
+  },
 });

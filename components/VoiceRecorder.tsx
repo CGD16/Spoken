@@ -1,13 +1,13 @@
 // components/VoiceRecorder.tsx
-import { useEffect } from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
 import {
-  useAudioRecorder,
-  useAudioRecorderState,
   AudioModule,
   RecordingPresets,
   setAudioModeAsync,
-} from 'expo-audio';
+  useAudioRecorder,
+  useAudioRecorderState,
+} from "expo-audio";
+import { useEffect } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type Props = {
   onRecordingComplete: (uri: string) => void;
@@ -20,7 +20,10 @@ export default function VoiceRecorder({ onRecordingComplete }: Props) {
   useEffect(() => {
     (async () => {
       await AudioModule.requestRecordingPermissionsAsync();
-      await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        allowsRecording: true,
+      });
     })();
   }, []);
 
@@ -36,32 +39,54 @@ export default function VoiceRecorder({ onRecordingComplete }: Props) {
     }
   };
 
+  const isRecording = recorderState.isRecording;
+
   return (
-    <Pressable
-      style={[styles.fab, recorderState.isRecording && styles.fabRecording]}
-      onPress={recorderState.isRecording ? stopRecording : startRecording}
-    >
-      <Text style={styles.icon}>{recorderState.isRecording ? '⏹' : '🎤'}</Text>
-    </Pressable>
+    <View style={styles.row}>
+      <View style={styles.label}>
+        <Text style={styles.labelText}>
+          {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
+        </Text>
+      </View>
+      <Pressable
+        style={[styles.fab, isRecording && styles.fabRecording]}
+        onPress={isRecording ? stopRecording : startRecording}
+      >
+        <Text style={styles.icon}>{isRecording ? "⏹" : "🎤"}</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", gap: 10 },
+  label: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  labelText: { fontSize: 13, fontWeight: "600", color: "#1c2b39" },
   fab: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#16a596',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    backgroundColor: "#16a596",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 6,
   },
   fabRecording: {
-    backgroundColor: '#d9534f',
+    backgroundColor: "#d9534f",
   },
   icon: { fontSize: 26 },
 });
