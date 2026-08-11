@@ -5,7 +5,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { uploadAudioAndProcessNote, processNote } from '@/lib/notes';
-import VoiceRecorder from '@/components/VoiceRecorder';
+// import VoiceRecorder from '@/components/VoiceRecorder';
+import RecordButton from '@/components/RecordButton';
 import ModeActionSheet, { NoteMode } from '@/components/ModeActionSheet';
 
 type Note = {
@@ -118,7 +119,7 @@ export default function NotesListScreen() {
       />
 
       <View style={styles.recorderContainer}>
-        <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
+        <RecordButton onRecordingComplete={handleRecordingComplete} />
       </View>
 
       <ModeActionSheet
