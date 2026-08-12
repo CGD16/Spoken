@@ -1,12 +1,12 @@
 // components/SidebarNavigation.tsx
-import { Feather } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { BlurView } from "expo-blur";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
-  useSharedValue,
   withTiming,
+  useSharedValue,
 } from "react-native-reanimated";
 
 type TabKey =
@@ -15,7 +15,8 @@ type TabKey =
   | "tags"
   | "favorites"
   | "search"
-  | "settings";
+  | "settings"
+  | "trash";
 
 type NavItem = {
   key: TabKey;
@@ -29,6 +30,7 @@ const MAIN_ITEMS: NavItem[] = [
   { key: "tags", label: "Meine Tags", icon: "tag" },
   { key: "favorites", label: "Meine Favoriten", icon: "star" },
   { key: "search", label: "Suche", icon: "search" },
+  { key: "trash", label: "Papierkorb", icon: "trash-2" },
 ];
 
 const FOOTER_ITEM: NavItem = {
@@ -70,22 +72,43 @@ export default function SidebarNavigation({
 
   const renderItem = (item: NavItem) => {
     const isActive = activeTab === item.key;
+    const isNotesActive = isActive && item.key === "notes";
+
     return (
-      <Pressable
-        key={item.key}
-        onPress={() => onTabChange(item.key)}
-        style={[styles.item, isActive && styles.itemActive]}
-      >
-        <Feather
-          name={item.icon}
-          size={20}
-          color={isActive ? "#2563EB" : "#4A5568"}
-        />
-        {!collapsed && (
-          <Text style={[styles.itemLabel, isActive && styles.itemLabelActive]}>
-            {item.label}
-          </Text>
-        )}
+      <Pressable key={item.key} onPress={() => onTabChange(item.key)}>
+        {({ hovered }) => {
+          // Icon-Farbe passend zum Zustand
+          const iconColor = isNotesActive
+            ? "#1D4ED8"
+            : isActive || hovered
+              ? "#2563EB"
+              : "#4A5568";
+
+          return (
+            <View
+              style={[
+                styles.item,
+                hovered && !isActive && styles.itemHovered,
+                isActive && styles.itemActive,
+                isNotesActive && styles.itemActiveNotes,
+              ]}
+            >
+              <Feather name={item.icon} size={20} color={iconColor} />
+              {!collapsed && (
+                <Text
+                  style={[
+                    styles.itemLabel,
+                    hovered && styles.itemLabelHovered,
+                    isActive && styles.itemLabelActive,
+                    isNotesActive && styles.itemLabelActiveNotes,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              )}
+            </View>
+          );
+        }}
       </Pressable>
     );
   };
@@ -138,18 +161,38 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "transparent", // Verhindert Ruckeln beim Wechsel
+  },
+  itemHovered: {
+    backgroundColor: "#E2F1FF",
+    borderColor: "#C5E2FF",
   },
   itemActive: {
     backgroundColor: "#E0F2FE",
+    borderColor: "#1E40AF", // Rahmen in aktiver Schriftfarbe
+  },
+  itemActiveNotes: {
+    backgroundColor: "#D1E9FF",
+    borderColor: "#1D4ED8", // Rahmen in aktiver Notizen-Schriftfarbe
   },
   itemLabel: {
     fontSize: 14,
     fontWeight: "500",
     color: "#4A5568",
   },
+  itemLabelHovered: {
+    color: "#2563EB",
+    fontWeight: "600",
+  },
   itemLabelActive: {
     color: "#1E40AF",
     fontWeight: "600",
+  },
+  itemLabelActiveNotes: {
+    color: "#1D4ED8",
+    fontSize: 15,
+    fontWeight: "700",
   },
   footer: {
     marginTop: "auto",

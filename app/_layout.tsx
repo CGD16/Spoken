@@ -3,24 +3,33 @@ import { View, useWindowDimensions } from 'react-native';
 import { Slot, usePathname, useRouter } from 'expo-router';
 import SidebarNavigation from '@/components/SidebarNavigation';
 
-type TabKey = 'notes' | 'categories' | 'tags' | 'favorites' | 'search' | 'settings';
+type TabKey =
+  | "notes"
+  | "categories"
+  | "tags"
+  | "favorites"
+  | "search"
+  | "settings"
+  | "trash";
 
 const TAB_TO_PATH: Record<TabKey, string> = {
-  notes: '/',
-  categories: '/categories',
-  tags: '/tags',
-  favorites: '/favorites',
-  search: '/search',
-  settings: '/settings',
+  notes: "/",
+  categories: "/categories",
+  tags: "/tags",
+  favorites: "/favorites",
+  search: "/search",
+  settings: "/settings",
+  trash: "trash",
 };
 
 const PATH_TO_TAB: Record<string, TabKey> = {
-  '/': 'notes',
-  '/categories': 'categories',
-  '/tags': 'tags',
-  '/favorites': 'favorites',
-  '/search': 'search',
-  '/settings': 'settings',
+  "/": "notes",
+  "/categories": "categories",
+  "/tags": "tags",
+  "/favorites": "favorites",
+  "/search": "search",
+  "/settings": "settings",
+  "/trash": 'trash',
 };
 
 export default function TabLayout() {

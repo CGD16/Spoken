@@ -38,21 +38,57 @@ export default function EditMenu({
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.content}>
-            <Pressable
-              style={styles.option}
-              onPress={() => handle(onRenameTitle)}
-            >
-              <Feather name="edit-3" size={20} color="#2563EB" />
-              <Text style={styles.optionText}>Titel umbenennen</Text>
+            <Pressable onPress={() => handle(onRenameTitle)}>
+              {({ hovered }) => (
+                <View style={[styles.option, hovered && styles.optionHovered]}>
+                  <Feather
+                    name="edit-3"
+                    size={20}
+                    color={hovered ? "#1E40AF" : "#2563EB"}
+                  />
+                  <Text
+                    style={[
+                      styles.optionText,
+                      hovered && styles.optionTextHovered,
+                    ]}
+                  >
+                    Titel umbenennen
+                  </Text>
+                </View>
+              )}
             </Pressable>
-            <Pressable style={styles.option} onPress={() => handle(onEditTags)}>
-              <Feather name="tag" size={20} color="#2563EB" />
-              <Text style={styles.optionText}>Tags bearbeiten</Text>
+
+            <Pressable onPress={() => handle(onEditTags)}>
+              {({ hovered }) => (
+                <View style={[styles.option, hovered && styles.optionHovered]}>
+                  <Feather
+                    name="tag"
+                    size={20}
+                    color={hovered ? "#1E40AF" : "#2563EB"}
+                  />
+                  <Text
+                    style={[
+                      styles.optionText,
+                      hovered && styles.optionTextHovered,
+                    ]}
+                  >
+                    Tags bearbeiten
+                  </Text>
+                </View>
+              )}
             </Pressable>
+
             <View style={styles.divider} />
-            <Pressable style={styles.option} onPress={() => handle(onDelete)}>
-              <Feather name="trash-2" size={20} color="#DC2626" />
-              <Text style={styles.deleteText}>Löschen</Text>
+
+            <Pressable onPress={() => handle(onDelete)}>
+              {({ hovered }) => (
+                <View
+                  style={[styles.option, hovered && styles.optionDeleteHovered]}
+                >
+                  <Feather name="trash-2" size={20} color="#DC2626" />
+                  <Text style={styles.deleteText}>Löschen</Text>
+                </View>
+              )}
             </Pressable>
           </View>
         </Pressable>
@@ -68,12 +104,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "rgba(240, 246, 255, 0.85)",
+    backgroundColor: "rgba(240, 246, 255, 0.95)",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: "rgba(225, 232, 240, 0.6)",
+    borderColor: "rgba(225, 232, 240, 0.8)",
     overflow: "hidden",
   },
   content: { padding: 16, gap: 4 },
@@ -83,9 +119,12 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: 8,
   },
+  optionHovered: { backgroundColor: "#E0F2FE" },
+  optionDeleteHovered: { backgroundColor: "#FEE2E2" },
   optionText: { fontSize: 14, color: "#4A5568", fontWeight: "500" },
+  optionTextHovered: { color: "#1E40AF", fontWeight: "600" },
   deleteText: { fontSize: 14, color: "#DC2626", fontWeight: "600" },
   divider: {
     height: 1,

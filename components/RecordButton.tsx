@@ -110,7 +110,7 @@ export default function RecordButton({ onRecordingComplete }: Props) {
       onPress={handlePress}
       style={[styles.pill, containerAnimatedStyle]}
     >
-      <BlurView intensity={50} tint="light" style={styles.blur}>
+      <BlurView intensity={65} tint="light" style={styles.blur}>
         <Text style={styles.label}>
           {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
         </Text>
@@ -134,12 +134,15 @@ export default function RecordButton({ onRecordingComplete }: Props) {
 const styles = StyleSheet.create({
   pill: {
     borderRadius: 9999,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    // iOS / Native Schatten
+    shadowColor: "#1E293B",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    // Android Schatten
+    elevation: 8,
+    // Web Schatten (verhindert das Abschneiden durch overflow)
+    boxShadow: "0px 6px 20px rgba(30, 41, 59, 0.12)",
   },
   blur: {
     flexDirection: "row",
@@ -147,7 +150,11 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 6,
     paddingVertical: 6,
-    backgroundColor: "rgba(255,255,255,0.6)",
+    borderRadius: 9999,
+    overflow: "hidden",
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    borderWidth: 1,
+    borderColor: "rgba(225, 232, 240, 0.7)",
   },
   label: {
     fontSize: 14,

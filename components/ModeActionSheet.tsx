@@ -98,13 +98,29 @@ export default function ModeActionSheet({
                 {(Object.keys(MODE_CONFIGS) as NoteMode[]).map((mode) => {
                   const config = MODE_CONFIGS[mode];
                   return (
-                    <Pressable
-                      key={mode}
-                      style={styles.option}
-                      onPress={() => handlePress(mode)}
-                    >
-                      <Feather name={config.icon} size={20} color="#2563EB" />
-                      <Text style={styles.optionText}>{config.label}</Text>
+                    <Pressable key={mode} onPress={() => handlePress(mode)}>
+                      {({ hovered }) => (
+                        <View
+                          style={[
+                            styles.option,
+                            hovered && styles.optionHovered,
+                          ]}
+                        >
+                          <Feather
+                            name={config.icon}
+                            size={20}
+                            color="#2563EB"
+                          />
+                          <Text
+                            style={[
+                              styles.optionText,
+                              hovered && styles.optionTextHovered,
+                            ]}
+                          >
+                            {config.label}
+                          </Text>
+                        </View>
+                      )}
                     </Pressable>
                   );
                 })}
@@ -112,12 +128,29 @@ export default function ModeActionSheet({
                 {onDelete && (
                   <>
                     <View style={styles.divider} />
-                    <Pressable
-                      style={styles.option}
-                      onPress={handleDeletePress}
-                    >
-                      <Feather name="trash-2" size={20} color="#DC2626" />
-                      <Text style={styles.deleteText}>Notiz löschen</Text>
+                    <Pressable onPress={handleDeletePress}>
+                      {({ hovered }) => (
+                        <View
+                          style={[
+                            styles.option,
+                            hovered && styles.deleteHovered,
+                          ]}
+                        >
+                          <Feather
+                            name="trash-2"
+                            size={20}
+                            color={hovered ? "#DC2626" : "#E53E3E"}
+                          />
+                          <Text
+                            style={[
+                              styles.deleteText,
+                              hovered && styles.deleteTextHovered,
+                            ]}
+                          >
+                            Notiz löschen
+                          </Text>
+                        </View>
+                      )}
                     </Pressable>
                   </>
                 )}
@@ -176,11 +209,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  optionHovered: {
+    backgroundColor: "#E2F1FF",
+    borderColor: "#C5E2FF",
   },
   optionText: {
     fontSize: 14,
     color: "#4A5568",
     fontWeight: "500",
+  },
+  optionTextHovered: {
+    color: "#2553B8",
+    fontWeight: "600",
   },
   titleText: {
     fontSize: 14,
@@ -221,6 +264,14 @@ const styles = StyleSheet.create({
   deleteText: {
     fontSize: 14,
     color: "#DC2626",
+    fontWeight: "500",
+  },
+  deleteHovered: {
+    backgroundColor: "#FEE2E2",
+    borderColor: "#FCA5A5",
+  },
+  deleteTextHovered: {
+    color: "#B91C1C",
     fontWeight: "600",
   },
 });

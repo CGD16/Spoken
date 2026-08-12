@@ -196,25 +196,67 @@ export default function NotesListScreen() {
               <Text style={styles.cardDate}>
                 {new Date(item.created_at).toLocaleDateString("de-DE")}
               </Text>
+
               <View style={styles.cardHeaderIcons}>
                 <Pressable
                   onPress={() => handleToggleFavorite(item)}
                   hitSlop={12}
                 >
-                  <Ionicons
-                    name={item.is_favorite ? "star" : "star-outline"}
-                    size={18}
-                    color={item.is_favorite ? "#f5a623" : "#9aa5b1"}
-                  />
+                  {({ hovered }) => (
+                    <View
+                      style={[
+                        styles.iconButton,
+                        hovered && styles.iconButtonHovered,
+                      ]}
+                    >
+                      <Ionicons
+                        name={item.is_favorite ? "star" : "star-outline"}
+                        size={18}
+                        color={
+                          item.is_favorite
+                            ? "#FFF051"
+                            : hovered
+                              ? "#2553B8"
+                              : "#9aa5b1"
+                        }
+                      />
+                    </View>
+                  )}
                 </Pressable>
                 <Pressable onPress={() => openEditMenu(item)} hitSlop={12}>
-                  <Feather name="edit-2" size={18} color="#9aa5b1" />
+                  {({ hovered }) => (
+                    <View
+                      style={[
+                        styles.iconButton,
+                        hovered && styles.iconButtonHovered,
+                      ]}
+                    >
+                      <Feather
+                        name="edit-2"
+                        size={18}
+                        color={hovered ? "#2553B8" : "#9aa5b1"}
+                      />
+                    </View>
+                  )}
                 </Pressable>
                 <Pressable
                   onPress={() => openMenuForNote(item.id)}
                   hitSlop={12}
                 >
-                  <Feather name="more-horizontal" size={20} color="#9aa5b1" />
+                  {({ hovered }) => (
+                    <View
+                      style={[
+                        styles.iconButton,
+                        hovered && styles.iconButtonHovered,
+                      ]}
+                    >
+                      <Feather
+                        name="more-horizontal"
+                        size={18}
+                        color={hovered ? "#2553B8" : "#9aa5b1"}
+                      />
+                    </View>
+                  )}
                 </Pressable>
               </View>
             </View>
@@ -326,6 +368,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardHeaderIcons: { flexDirection: "row", alignItems: "center", gap: 14 },
+  iconButton: { padding: 6, borderRadius: 8},
+  iconButtonHovered: {
+    backgroundColor: "#E2F1FF",
+    borderWidth: 1,
+    borderColor: "#C5E2FF",
+  },
   cardDate: { fontSize: 12, color: "#9aa5b1" },
   cardTitle: { fontSize: 16, fontWeight: "700", color: "#1c2b39" },
   cardPreview: { fontSize: 14, color: "#5b6b7a", lineHeight: 19 },
