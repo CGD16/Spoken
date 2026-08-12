@@ -101,6 +101,17 @@ export async function deleteNote(noteId: string) {
   if (error) throw error;
 }
 
+export async function updateNoteTitle(noteId: string, title: string) {
+  const { error } = await supabase.from('notes').update({ title }).eq('id', noteId);
+  if (error) throw error;
+}
+
+export async function updateNoteTags(noteId: string, tags: string[]) {
+  const { error } = await supabase.from('notes').update({ tags }).eq('id', noteId);
+  if (error) throw error;
+}
+
+
 // Hilfsfunktion: Base64 zu ArrayBuffer (nur für den nativen Pfad benötigt)
 function decode(base64: string) {
   const binary = atob(base64);

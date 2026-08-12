@@ -11,17 +11,22 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import {
   uploadAudioAndProcessNote,
   processNote,
   toggleFavorite,
   deleteNote,
+  updateNoteTitle,
+  updateNoteTags,
 } from "@/lib/notes";
 import RecordButton from "@/components/RecordButton";
 import ModeActionSheet, { NoteMode } from "@/components/ModeActionSheet";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import EditMenu from "@/components/EditMenu";
+import RenameTitleDialog from "@/components/RenameTitleDialog";
+import EditTagsDialog from "@/components/EditTagsDialog";
 
 type Note = {
   id: string;
@@ -39,9 +44,17 @@ export default function NotesListScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Aufnahme -> Modus wählen (bestehender Flow, unverändert)
   const [pendingUri, setPendingUri] = useState<string | null>(null);
   const [pendingNoteId, setPendingNoteId] = useState<string | null>(null);
   const [sheetVisible, setSheetVisible] = useState(false);
+
+  // Bearbeiten-Menü (Stift-Icon): Titel/Tags/Löschen
+  const [editTargetNote, setEditTargetNote] = useState<Note | null>(null);
+  const [editMenuVisible, setEditMenuVisible] = useState(false);
+  const [renameDialogVisible, setRenameDialogVisible] = useState(false);
+  const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const loadNotes = useCallback(async () => {
@@ -71,6 +84,7 @@ export default function NotesListScreen() {
     setSheetVisible(true);
   };
 
+  // Drei-Punkte-Icon: bleibt wie gehabt -> Modus-Auswahl (kein Löschen mehr hier)
   const openMenuForNote = (noteId: string) => {
     setPendingNoteId(noteId);
     setPendingUri(null);
@@ -94,7 +108,6 @@ export default function NotesListScreen() {
   };
 
   const handleToggleFavorite = async (note: Note) => {
-    // Optimistisches Update: UI sofort ändern, im Fehlerfall zurückrollen
     setNotes((prev) =>
       prev.map((n) =>
         n.id === note.id ? { ...n, is_favorite: !n.is_favorite } : n,
@@ -104,13 +117,37 @@ export default function NotesListScreen() {
       await toggleFavorite(note.id, !note.is_favorite);
     } catch (err) {
       console.error("Fehler beim Favorisieren:", err);
-      loadNotes(); // bei Fehler echten Stand neu laden
+      loadNotes();
     }
   };
 
-  const handleDeleteRequest = () => {
-    if (pendingNoteId) {
-      setDeleteTargetId(pendingNoteId);
+  // Stift-Icon: öffnet das Bearbeiten-Dropdown
+  const openEditMenu = (note: Note) => {
+    setEditTargetNote(note);
+    setEditMenuVisible(true);
+  };
+
+  const handleRenameTitle = async (newTitle: string) => {
+    if (!editTargetNote) return;
+    try {
+      await updateNoteTitle(editTargetNote.id, newTitle);
+      setRenameDialogVisible(false);
+      setEditTargetNote(null);
+      loadNotes();
+    } catch (err) {
+      console.error("Fehler beim Umbenennen:", err);
+    }
+  };
+
+  const handleSaveTags = async (newTags: string[]) => {
+    if (!editTargetNote) return;
+    try {
+      await updateNoteTags(editTargetNote.id, newTags);
+      setTagsDialogVisible(false);
+      setEditTargetNote(null);
+      loadNotes();
+    } catch (err) {
+      console.error("Fehler beim Speichern der Tags:", err);
     }
   };
 
@@ -119,6 +156,7 @@ export default function NotesListScreen() {
     try {
       await deleteNote(deleteTargetId);
       setDeleteTargetId(null);
+      setEditTargetNote(null);
       loadNotes();
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
@@ -169,11 +207,14 @@ export default function NotesListScreen() {
                     color={item.is_favorite ? "#f5a623" : "#9aa5b1"}
                   />
                 </Pressable>
+                <Pressable onPress={() => openEditMenu(item)} hitSlop={12}>
+                  <Feather name="edit-2" size={18} color="#9aa5b1" />
+                </Pressable>
                 <Pressable
                   onPress={() => openMenuForNote(item.id)}
                   hitSlop={12}
                 >
-                  <Text style={styles.dots}>⋯</Text>
+                  <Feather name="more-horizontal" size={20} color="#9aa5b1" />
                 </Pressable>
               </View>
             </View>
@@ -205,21 +246,53 @@ export default function NotesListScreen() {
         <RecordButton onRecordingComplete={handleRecordingComplete} />
       </View>
 
+      {/* Drei-Punkte -> Modus-Auswahl (kein Löschen mehr hier) */}
       <ModeActionSheet
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}
         onSelect={handleModeSelected}
-        onDelete={pendingNoteId ? handleDeleteRequest : undefined}
+      />
+
+      {/* Stift-Icon -> Bearbeiten-Dropdown */}
+      <EditMenu
+        visible={editMenuVisible}
+        onClose={() => setEditMenuVisible(false)}
+        onRenameTitle={() => setRenameDialogVisible(true)}
+        onEditTags={() => setTagsDialogVisible(true)}
+        onDelete={() => editTargetNote && setDeleteTargetId(editTargetNote.id)}
+      />
+
+      <RenameTitleDialog
+        visible={renameDialogVisible}
+        initialTitle={editTargetNote?.title ?? ""}
+        onSave={handleRenameTitle}
+        onCancel={() => {
+          setRenameDialogVisible(false);
+          setEditTargetNote(null);
+        }}
+      />
+
+      <EditTagsDialog
+        visible={tagsDialogVisible}
+        initialTags={editTargetNote?.tags ?? []}
+        onSave={handleSaveTags}
+        onCancel={() => {
+          setTagsDialogVisible(false);
+          setEditTargetNote(null);
+        }}
       />
 
       <ConfirmDialog
         visible={!!deleteTargetId}
-        title="Notiz löschen"
-        message="Möchtest du diese Notiz wirklich löschen? Das kann nicht rückgängig gemacht werden."
+        title="Notiz löschen?"
+        message="Möchtest du diese Notiz wirklich löschen?"
         confirmLabel="Löschen"
         destructive
         onConfirm={confirmDelete}
-        onCancel={() => setDeleteTargetId(null)}
+        onCancel={() => {
+          setDeleteTargetId(null);
+          setEditTargetNote(null);
+        }}
       />
     </View>
   );
@@ -254,7 +327,6 @@ const styles = StyleSheet.create({
   },
   cardHeaderIcons: { flexDirection: "row", alignItems: "center", gap: 14 },
   cardDate: { fontSize: 12, color: "#9aa5b1" },
-  dots: { fontSize: 20, color: "#9aa5b1", paddingHorizontal: 8 },
   cardTitle: { fontSize: 16, fontWeight: "700", color: "#1c2b39" },
   cardPreview: { fontSize: 14, color: "#5b6b7a", lineHeight: 19 },
   tags: { fontSize: 12, color: "#2f95dc", fontWeight: "600" },
