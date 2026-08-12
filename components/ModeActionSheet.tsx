@@ -39,12 +39,14 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onSelect: (mode: NoteMode, customInstruction?: string) => void;
+  onDelete?: () => void;
 };
 
 export default function ModeActionSheet({
   visible,
   onClose,
   onSelect,
+  onDelete,
 }: Props) {
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState("");
@@ -71,6 +73,11 @@ export default function ModeActionSheet({
     onClose();
   };
 
+  const handleDeletePress = () => {
+    onClose();
+    onDelete?.();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -86,21 +93,38 @@ export default function ModeActionSheet({
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.content}>
-            {!customMode ? (
-              (Object.keys(MODE_CONFIGS) as NoteMode[]).map((mode) => {
-                const config = MODE_CONFIGS[mode];
-                return (
-                  <Pressable
-                    key={mode}
-                    style={styles.option}
-                    onPress={() => handlePress(mode)}
-                  >
-                    <Feather name={config.icon} size={20} color="#2563EB" />
-                    <Text style={styles.optionText}>{config.label}</Text>
-                  </Pressable>
-                );
-              })
-            ) : (
+            {!customMode && (
+              <>
+                {(Object.keys(MODE_CONFIGS) as NoteMode[]).map((mode) => {
+                  const config = MODE_CONFIGS[mode];
+                  return (
+                    <Pressable
+                      key={mode}
+                      style={styles.option}
+                      onPress={() => handlePress(mode)}
+                    >
+                      <Feather name={config.icon} size={20} color="#2563EB" />
+                      <Text style={styles.optionText}>{config.label}</Text>
+                    </Pressable>
+                  );
+                })}
+
+                {onDelete && (
+                  <>
+                    <View style={styles.divider} />
+                    <Pressable
+                      style={styles.option}
+                      onPress={handleDeletePress}
+                    >
+                      <Feather name="trash-2" size={20} color="#DC2626" />
+                      <Text style={styles.deleteText}>Notiz löschen</Text>
+                    </Pressable>
+                  </>
+                )}
+              </>
+            )}
+
+            {customMode && (
               <View style={styles.customContainer}>
                 <Text style={styles.titleText}>
                   Was soll damit gemacht werden?
@@ -188,5 +212,15 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
     fontSize: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(225, 232, 240, 0.6)",
+    marginVertical: 8,
+  },
+  deleteText: {
+    fontSize: 14,
+    color: "#DC2626",
+    fontWeight: "600",
   },
 });

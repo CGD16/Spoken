@@ -80,6 +80,27 @@ export async function getAudioSignedUrl(audioPath: string) {
   return data.signedUrl;
 }
 
+export async function toggleFavorite(noteId: string, isFavorite: boolean) {
+  const { error } = await supabase.from('notes').update({ is_favorite: isFavorite }).eq('id', noteId);
+  if (error) throw error;
+}
+
+export async function deleteNote(noteId: string) {
+  const { data: note, error: fetchError } = await supabase
+    .from('notes')
+    .select('audio_url')
+    .eq('id', noteId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  if (note?.audio_url) {
+    await supabase.storage.from('voice-notes').remove([note.audio_url]);
+  }
+
+  const { error } = await supabase.from('notes').delete().eq('id', noteId);
+  if (error) throw error;
+}
+
 // Hilfsfunktion: Base64 zu ArrayBuffer (nur für den nativen Pfad benötigt)
 function decode(base64: string) {
   const binary = atob(base64);
