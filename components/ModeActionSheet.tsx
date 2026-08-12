@@ -1,17 +1,38 @@
 // components/ModeActionSheet.tsx
-import { useState } from 'react';
-import { Modal, View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
+import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { useState } from "react";
+import {
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-export type NoteMode = 'todo' | 'diary' | 'idea' | 'message' | 'style' | 'blog' | 'custom';
+export type NoteMode =
+  | "todo"
+  | "diary"
+  | "idea"
+  | "message"
+  | "style"
+  | "blog"
+  | "custom";
 
-const MODE_LABELS: Record<NoteMode, string> = {
-  todo: '✅ To-Do-Liste',
-  diary: '📔 Tagebucheintrag',
-  idea: '💡 Ideen-Notiz',
-  message: '✉️ Nachrichten-Entwurf',
-  style: '✨ Stil verbessern',
-  blog: '📝 Blogartikel-Entwurf',
-  custom: '🎯 Eigener Modus',
+type ModeConfig = {
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+};
+
+const MODE_CONFIGS: Record<NoteMode, ModeConfig> = {
+  todo: { label: "To-Do-Liste", icon: "check-square" },
+  diary: { label: "Tagebucheintrag", icon: "book" },
+  idea: { label: "Ideen-Notiz", icon: "zap" },
+  message: { label: "Nachrichten-Entwurf", icon: "mail" },
+  style: { label: "Stil verbessern", icon: "edit-3" },
+  blog: { label: "Blogartikel-Entwurf", icon: "file-text" },
+  custom: { label: "Eigener Modus", icon: "target" },
 };
 
 type Props = {
@@ -20,12 +41,16 @@ type Props = {
   onSelect: (mode: NoteMode, customInstruction?: string) => void;
 };
 
-export default function ModeActionSheet({ visible, onClose, onSelect }: Props) {
+export default function ModeActionSheet({
+  visible,
+  onClose,
+  onSelect,
+}: Props) {
   const [customMode, setCustomMode] = useState(false);
-  const [customText, setCustomText] = useState('');
+  const [customText, setCustomText] = useState("");
 
   const handlePress = (mode: NoteMode) => {
-    if (mode === 'custom') {
+    if (mode === "custom") {
       setCustomMode(true);
       return;
     }
@@ -37,36 +62,64 @@ export default function ModeActionSheet({ visible, onClose, onSelect }: Props) {
     if (!customText.trim()) return;
     setCustomMode(false);
     onClose();
-    onSelect('custom', customText.trim());
-    setCustomText('');
+    onSelect("custom", customText.trim());
+    setCustomText("");
+  };
+
+  const handleClose = () => {
+    setCustomMode(false);
+    onClose();
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={handleClose}
+    >
+      <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
-          {!customMode ? (
-            (Object.keys(MODE_LABELS) as NoteMode[]).map((mode) => (
-              <Pressable key={mode} style={styles.option} onPress={() => handlePress(mode)}>
-                <Text style={styles.optionText}>{MODE_LABELS[mode]}</Text>
-              </Pressable>
-            ))
-          ) : (
-            <View style={styles.customContainer}>
-              <Text style={styles.optionText}>Was soll damit gemacht werden?</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="z.B. Fasse als Haiku zusammen"
-                value={customText}
-                onChangeText={setCustomText}
-                autoFocus
-                multiline
-              />
-              <Pressable style={styles.submitButton} onPress={submitCustom}>
-                <Text style={styles.submitButtonText}>Anwenden</Text>
-              </Pressable>
-            </View>
-          )}
+          <BlurView
+            intensity={45}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={styles.content}>
+            {!customMode ? (
+              (Object.keys(MODE_CONFIGS) as NoteMode[]).map((mode) => {
+                const config = MODE_CONFIGS[mode];
+                return (
+                  <Pressable
+                    key={mode}
+                    style={styles.option}
+                    onPress={() => handlePress(mode)}
+                  >
+                    <Feather name={config.icon} size={20} color="#2563EB" />
+                    <Text style={styles.optionText}>{config.label}</Text>
+                  </Pressable>
+                );
+              })
+            ) : (
+              <View style={styles.customContainer}>
+                <Text style={styles.titleText}>
+                  Was soll damit gemacht werden?
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="z.B. Fasse als Haiku zusammen"
+                  placeholderTextColor="#A0AEC0"
+                  value={customText}
+                  onChangeText={setCustomText}
+                  autoFocus
+                  multiline
+                />
+                <Pressable style={styles.submitButton} onPress={submitCustom}>
+                  <Text style={styles.submitButtonText}>Anwenden</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
         </Pressable>
       </Pressable>
     </Modal>
@@ -74,12 +127,66 @@ export default function ModeActionSheet({ visible, onClose, onSelect }: Props) {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16, gap: 4 },
-  option: { paddingVertical: 14, paddingHorizontal: 8 },
-  optionText: { fontSize: 16 },
-  customContainer: { gap: 12, paddingVertical: 8 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16, minHeight: 80, textAlignVertical: 'top' },
-  submitButton: { backgroundColor: '#2f95dc', borderRadius: 8, padding: 14, alignItems: 'center' },
-  submitButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: "rgba(240, 246, 255, 0.85)",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: "rgba(225, 232, 240, 0.6)",
+    overflow: "hidden",
+  },
+  content: {
+    padding: 16,
+    gap: 4,
+  },
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#4A5568",
+    fontWeight: "500",
+  },
+  titleText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1E40AF",
+  },
+  customContainer: {
+    gap: 12,
+    paddingVertical: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "rgba(225, 232, 240, 0.8)",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 14,
+    color: "#4A5568",
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  submitButton: {
+    backgroundColor: "#2563EB",
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 14,
+  },
 });
