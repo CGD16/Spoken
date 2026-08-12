@@ -1,45 +1,46 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator } from 'react-native';
-import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { AuthProvider, useAuth } from '@/lib/auth-context';
+// app/(tabs)/_layout.tsx
+import { View, useWindowDimensions } from 'react-native';
+import { Slot, usePathname, useRouter } from 'expo-router';
+import SidebarNavigation from '@/components/SidebarNavigation';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
+type TabKey = 'notes' | 'categories' | 'tags' | 'favorites' | 'search' | 'settings';
+
+const TAB_TO_PATH: Record<TabKey, string> = {
+  notes: '/',
+  categories: '/categories',
+  tags: '/tags',
+  favorites: '/favorites',
+  search: '/search',
+  settings: '/settings',
 };
 
-function RootNavigator() {
-  const { session, isLoading } = useAuth();
+const PATH_TO_TAB: Record<string, TabKey> = {
+  '/': 'notes',
+  '/categories': 'categories',
+  '/tags': 'tags',
+  '/favorites': 'favorites',
+  '/search': 'search',
+  '/settings': 'settings',
+};
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+export default function TabLayout() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
+
+  const activeTab = PATH_TO_TAB[pathname] ?? 'notes';
+
+  return (
+    <View style={{ flex: 1, flexDirection: 'row' }}>
+      <SidebarNavigation
+        activeTab={activeTab}
+        onTabChange={(tab) => router.push(TAB_TO_PATH[tab] as any)}
+        defaultCollapsed={!isWide}
+      />
+      <View style={{ flex: 1 }}>
+        <Slot />
       </View>
-    );
-  }
-
-  return (
-    <Stack>
-      <Stack.Protected guard={!!session}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      <Stack.Screen name="note/[id]" options={{ title: 'Notiz' }} />
-    </Stack.Protected>
-    </Stack>
-  );
-}
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <RootNavigator />
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </AuthProvider>
+    </View>
   );
 }
