@@ -144,7 +144,7 @@ export default function NotesListScreen() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
         ListEmptyComponent={
           <Text style={styles.empty}>
-            Noch keine Notizen – tippe unten auf 🎤
+            Noch keine Notizen - tippe unten auf 🎤
           </Text>
         }
         renderItem={({ item }) => (

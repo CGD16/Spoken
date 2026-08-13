@@ -18,6 +18,8 @@ export default function NoteCard({
   onOpenEditMenu,
   onOpenModeMenu,
 }: Props) {
+  const isFav = !!note.is_favorite;
+
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardHeader}>
@@ -26,26 +28,35 @@ export default function NoteCard({
         </Text>
 
         <View style={styles.cardHeaderIcons}>
-          <Pressable onPress={onToggleFavorite} hitSlop={12}>
+          {/* Favoriten-Stern */}
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }}
+            hitSlop={12}
+          >
             {({ hovered }) => (
               <View
                 style={[styles.iconButton, hovered && styles.iconButtonHovered]}
               >
                 <Ionicons
-                  name={note.is_favorite ? "star" : "star-outline"}
+                  name={isFav ? "star" : "star-outline"}
                   size={18}
-                  color={
-                    note.is_favorite
-                      ? "#FFF051"
-                      : hovered
-                        ? "#2553B8"
-                        : "#9aa5b1"
-                  }
+                  color={isFav ? "#EAB308" : hovered ? "#2553B8" : "#9aa5b1"}
                 />
               </View>
             )}
           </Pressable>
-          <Pressable onPress={onOpenEditMenu} hitSlop={12}>
+
+          {/* Edit-Stift */}
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onOpenEditMenu();
+            }}
+            hitSlop={12}
+          >
             {({ hovered }) => (
               <View
                 style={[styles.iconButton, hovered && styles.iconButtonHovered]}
@@ -58,7 +69,15 @@ export default function NoteCard({
               </View>
             )}
           </Pressable>
-          <Pressable onPress={onOpenModeMenu} hitSlop={12}>
+
+          {/* More Horizontal */}
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onOpenModeMenu();
+            }}
+            hitSlop={12}
+          >
             {({ hovered }) => (
               <View
                 style={[styles.iconButton, hovered && styles.iconButtonHovered]}

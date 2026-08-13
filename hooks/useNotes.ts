@@ -50,11 +50,19 @@ export function useNotes() {
   };
 
   const toggleFavorite = async (note: Note) => {
+    const nextState = !note.is_favorite;
+
     setNotes((prev) =>
-      prev.map((n) => (n.id === note.id ? { ...n, is_favorite: !n.is_favorite } : n))
+      prev.map((n) => (n.id === note.id ? { ...n, is_favorite: nextState } : n))
     );
+
     try {
-      await toggleFavoriteApi(note.id, !note.is_favorite);
+      const { error } = await supabase
+        .from('notes')
+        .update({ is_favorite: nextState })
+        .eq('id', note.id);
+
+      if (error) throw error;
     } catch (err) {
       console.error('Fehler beim Favorisieren:', err);
       loadNotes();
@@ -71,9 +79,11 @@ export function useNotes() {
     loadNotes();
   };
 
-  // Neu hinzugefügt:
-  const saveResult = async (noteId: string, summary: string) => {
-    await supabase.from('notes').update({ summary }).eq('id', noteId);
+  const saveResult = async (noteId: string, text: string) => {
+    await supabase
+      .from('notes')
+      .update({ processed_text: text })
+      .eq('id', noteId);
     loadNotes();
   };
 
@@ -92,7 +102,7 @@ export function useNotes() {
     toggleFavorite,
     renameTitle,
     saveTags,
-    saveResult, // Neu hinzugefügt
+    saveResult,
     remove,
   };
 }
