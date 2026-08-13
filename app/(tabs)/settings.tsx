@@ -10,14 +10,16 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function SettingsScreen() {
+  const { isDarkMode, toggleDarkMode } = useTheme();
+
   const [language, setLanguage] = useState<"de" | "en">("de");
   const [dateFormat, setDateFormat] = useState<
     "DD.MM.YYYY" | "YYYY-MM-DD" | "MM/DD/YYYY"
   >("DD.MM.YYYY");
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">("24h");
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Einstellungen beim Start laden
   useEffect(() => {
@@ -29,12 +31,10 @@ export default function SettingsScreen() {
       const savedLang = await AsyncStorage.getItem("@setting_language");
       const savedDate = await AsyncStorage.getItem("@setting_date_format");
       const savedTime = await AsyncStorage.getItem("@setting_time_format");
-      const savedDark = await AsyncStorage.getItem("@setting_dark_mode");
 
       if (savedLang) setLanguage(savedLang as "de" | "en");
       if (savedDate) setDateFormat(savedDate as any);
       if (savedTime) setTimeFormat(savedTime as any);
-      if (savedDark !== null) setIsDarkMode(JSON.parse(savedDark));
     } catch (e) {
       console.error("Fehler beim Laden der Einstellungen", e);
     }
@@ -69,21 +69,35 @@ export default function SettingsScreen() {
   };
 
   const handleDarkModeToggle = (value: boolean) => {
-    setIsDarkMode(value);
-    saveSetting("@setting_dark_mode", value);
+    toggleDarkMode(value);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.header}>Einstellungen</Text>
+    <ScrollView
+      style={[styles.container, isDarkMode && styles.containerDark]}
+      contentContainerStyle={styles.content}
+    >
+      <Text style={[styles.header, isDarkMode && styles.textDark]}>
+        Einstellungen
+      </Text>
 
       {/* Erscheinungsbild */}
-      <Text style={styles.sectionTitle}>Erscheinungsbild</Text>
-      <View style={styles.card}>
+      <Text
+        style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}
+      >
+        Erscheinungsbild
+      </Text>
+      <View style={[styles.card, isDarkMode && styles.cardDark]}>
         <View style={styles.row}>
           <View style={styles.rowLeft}>
-            <Feather name="moon" size={20} color="#1c2b39" />
-            <Text style={styles.rowLabel}>Dunkelmodus (Dark Mode)</Text>
+            <Feather
+              name="moon"
+              size={20}
+              color={isDarkMode ? "#94A3B8" : "#1c2b39"}
+            />
+            <Text style={[styles.rowLabel, isDarkMode && styles.textDark]}>
+              Dunkelmodus (Dark Mode)
+            </Text>
           </View>
           <Switch
             value={isDarkMode}
@@ -95,25 +109,41 @@ export default function SettingsScreen() {
       </View>
 
       {/* Sprache */}
-      <Text style={styles.sectionTitle}>Sprache</Text>
-      <View style={styles.card}>
+      <Text
+        style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}
+      >
+        Sprache
+      </Text>
+      <View style={[styles.card, isDarkMode && styles.cardDark]}>
         <TouchableOpacity
-          style={[styles.optionRow, language === "de" && styles.optionSelected]}
+          style={[
+            styles.optionRow,
+            language === "de" &&
+              (isDarkMode ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => handleLanguageChange("de")}
         >
-          <Text style={styles.optionLabel}>Deutsch</Text>
+          <Text style={[styles.optionLabel, isDarkMode && styles.textDark]}>
+            Deutsch
+          </Text>
           {language === "de" && (
             <Feather name="check" size={18} color="#3B82F6" />
           )}
         </TouchableOpacity>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, isDarkMode && styles.dividerDark]} />
 
         <TouchableOpacity
-          style={[styles.optionRow, language === "en" && styles.optionSelected]}
+          style={[
+            styles.optionRow,
+            language === "en" &&
+              (isDarkMode ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => handleLanguageChange("en")}
         >
-          <Text style={styles.optionLabel}>English</Text>
+          <Text style={[styles.optionLabel, isDarkMode && styles.textDark]}>
+            English
+          </Text>
           {language === "en" && (
             <Feather name="check" size={18} color="#3B82F6" />
           )}
@@ -121,23 +151,36 @@ export default function SettingsScreen() {
       </View>
 
       {/* Datumsformat */}
-      <Text style={styles.sectionTitle}>Datumsformat</Text>
-      <View style={styles.card}>
+      <Text
+        style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}
+      >
+        Datumsformat
+      </Text>
+      <View style={[styles.card, isDarkMode && styles.cardDark]}>
         {[
           { label: "DD.MM.YYYY (z. B. 12.08.2026)", value: "DD.MM.YYYY" },
           { label: "YYYY-MM-DD (z. B. 2026-08-12)", value: "YYYY-MM-DD" },
           { label: "MM/DD/YYYY (z. B. 08/12/2026)", value: "MM/DD/YYYY" },
         ].map((item, index) => (
           <View key={item.value}>
-            {index > 0 && <View style={styles.divider} />}
+            {index > 0 && (
+              <View
+                style={[styles.divider, isDarkMode && styles.dividerDark]}
+              />
+            )}
             <TouchableOpacity
               style={[
                 styles.optionRow,
-                dateFormat === item.value && styles.optionSelected,
+                dateFormat === item.value &&
+                  (isDarkMode
+                    ? styles.optionSelectedDark
+                    : styles.optionSelected),
               ]}
               onPress={() => handleDateFormatChange(item.value as any)}
             >
-              <Text style={styles.optionLabel}>{item.label}</Text>
+              <Text style={[styles.optionLabel, isDarkMode && styles.textDark]}>
+                {item.label}
+              </Text>
               {dateFormat === item.value && (
                 <Feather name="check" size={18} color="#3B82F6" />
               )}
@@ -147,31 +190,41 @@ export default function SettingsScreen() {
       </View>
 
       {/* Uhrzeitformat */}
-      <Text style={styles.sectionTitle}>Uhrzeitformat</Text>
-      <View style={styles.card}>
+      <Text
+        style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}
+      >
+        Uhrzeitformat
+      </Text>
+      <View style={[styles.card, isDarkMode && styles.cardDark]}>
         <TouchableOpacity
           style={[
             styles.optionRow,
-            timeFormat === "24h" && styles.optionSelected,
+            timeFormat === "24h" &&
+              (isDarkMode ? styles.optionSelectedDark : styles.optionSelected),
           ]}
           onPress={() => handleTimeFormatChange("24h")}
         >
-          <Text style={styles.optionLabel}>24-Stunden (11:14)</Text>
+          <Text style={[styles.optionLabel, isDarkMode && styles.textDark]}>
+            24-Stunden (11:14)
+          </Text>
           {timeFormat === "24h" && (
             <Feather name="check" size={18} color="#3B82F6" />
           )}
         </TouchableOpacity>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, isDarkMode && styles.dividerDark]} />
 
         <TouchableOpacity
           style={[
             styles.optionRow,
-            timeFormat === "12h" && styles.optionSelected,
+            timeFormat === "12h" &&
+              (isDarkMode ? styles.optionSelectedDark : styles.optionSelected),
           ]}
           onPress={() => handleTimeFormatChange("12h")}
         >
-          <Text style={styles.optionLabel}>12-Stunden (11:14 AM)</Text>
+          <Text style={[styles.optionLabel, isDarkMode && styles.textDark]}>
+            12-Stunden (11:14 AM)
+          </Text>
           {timeFormat === "12h" && (
             <Feather name="check" size={18} color="#3B82F6" />
           )}
@@ -183,6 +236,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f7f9fb" },
+  containerDark: { backgroundColor: "#0f172a" },
   content: { padding: 16, paddingBottom: 40 },
   header: {
     fontSize: 28,
@@ -190,6 +244,7 @@ const styles = StyleSheet.create({
     color: "#1c2b39",
     marginBottom: 20,
   },
+  textDark: { color: "#f8fafc" },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
@@ -199,6 +254,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginLeft: 4,
   },
+  sectionTitleDark: { color: "#94A3B8" },
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -206,38 +262,24 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0",
     overflow: "hidden",
   },
+  cardDark: { backgroundColor: "#1e293b", borderColor: "#334155" },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
   },
-  rowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  rowLabel: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#1c2b39",
-  },
+  rowLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  rowLabel: { fontSize: 15, fontWeight: "500", color: "#1c2b39" },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
   },
-  optionSelected: {
-    backgroundColor: "#F1F5F9",
-  },
-  optionLabel: {
-    fontSize: 15,
-    color: "#1c2b39",
-    fontWeight: "500",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#F1F5F9",
-  },
+  optionSelected: { backgroundColor: "#F1F5F9" },
+  optionSelectedDark: { backgroundColor: "#334155" },
+  optionLabel: { fontSize: 15, color: "#1c2b39", fontWeight: "500" },
+  divider: { height: 1, backgroundColor: "#F1F5F9" },
+  dividerDark: { backgroundColor: "#334155" },
 });

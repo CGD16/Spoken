@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from "react-native-reanimated";
+import { useTheme } from "@/context/ThemeContext";
 
 type TabKey =
   | "notes"
@@ -53,6 +54,7 @@ export default function SidebarNavigation({
   onTabChange,
   defaultCollapsed = false,
 }: Props) {
+  const { isDarkMode } = useTheme();
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const width = useSharedValue(
     defaultCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH,
@@ -77,20 +79,32 @@ export default function SidebarNavigation({
     return (
       <Pressable key={item.key} onPress={() => onTabChange(item.key)}>
         {({ hovered }) => {
-          // Icon-Farbe passend zum Zustand
-          const iconColor = isNotesActive
-            ? "#1D4ED8"
-            : isActive || hovered
-              ? "#2563EB"
-              : "#4A5568";
+          // Icon-Farbe passend zum Dark Mode und aktiven Zustand
+          const iconColor = isDarkMode
+            ? isActive
+              ? "#60A5FA"
+              : hovered
+                ? "#93C5FD"
+                : "#94A3B8"
+            : isNotesActive
+              ? "#1D4ED8"
+              : isActive || hovered
+                ? "#2563EB"
+                : "#4A5568";
 
           return (
             <View
               style={[
                 styles.item,
-                hovered && !isActive && styles.itemHovered,
-                isActive && styles.itemActive,
-                isNotesActive && styles.itemActiveNotes,
+                hovered &&
+                  !isActive &&
+                  (isDarkMode ? styles.itemHoveredDark : styles.itemHovered),
+                isActive &&
+                  (isDarkMode ? styles.itemActiveDark : styles.itemActive),
+                isNotesActive &&
+                  (isDarkMode
+                    ? styles.itemActiveNotesDark
+                    : styles.itemActiveNotes),
               ]}
             >
               <Feather name={item.icon} size={20} color={iconColor} />
@@ -98,9 +112,19 @@ export default function SidebarNavigation({
                 <Text
                   style={[
                     styles.itemLabel,
-                    hovered && styles.itemLabelHovered,
-                    isActive && styles.itemLabelActive,
-                    isNotesActive && styles.itemLabelActiveNotes,
+                    isDarkMode && styles.itemLabelDark,
+                    hovered &&
+                      (isDarkMode
+                        ? styles.itemLabelHoveredDark
+                        : styles.itemLabelHovered),
+                    isActive &&
+                      (isDarkMode
+                        ? styles.itemLabelActiveDark
+                        : styles.itemLabelActive),
+                    isNotesActive &&
+                      (isDarkMode
+                        ? styles.itemLabelActiveNotesDark
+                        : styles.itemLabelActiveNotes),
                   ]}
                 >
                   {item.label}
@@ -114,11 +138,28 @@ export default function SidebarNavigation({
   };
 
   return (
-    <Animated.View style={[styles.container, containerStyle]}>
-      <BlurView intensity={45} tint="light" style={StyleSheet.absoluteFill} />
+    <Animated.View
+      style={[
+        styles.container,
+        isDarkMode && styles.containerDark,
+        containerStyle,
+      ]}
+    >
+      <BlurView
+        intensity={45}
+        tint={isDarkMode ? "dark" : "light"}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={styles.inner}>
-        <Pressable onPress={toggleCollapse} style={styles.menuButton}>
-          <Feather name="menu" size={20} color="#2563EB" />
+        <Pressable
+          onPress={toggleCollapse}
+          style={[styles.menuButton, isDarkMode && styles.menuButtonDark]}
+        >
+          <Feather
+            name="menu"
+            size={20}
+            color={isDarkMode ? "#60A5FA" : "#2563EB"}
+          />
         </Pressable>
 
         <View style={styles.nav}>{MAIN_ITEMS.map(renderItem)}</View>
@@ -137,6 +178,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(240, 246, 255, 0.65)",
     overflow: "hidden",
   },
+  containerDark: {
+    borderColor: "rgba(51, 65, 85, 0.6)",
+    backgroundColor: "rgba(15, 23, 42, 0.85)",
+  },
   inner: {
     flex: 1,
     paddingTop: 16,
@@ -151,6 +196,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
+  menuButtonDark: {
+    backgroundColor: "rgba(30, 41, 59, 0.8)",
+  },
   nav: {
     gap: 4,
   },
@@ -162,19 +210,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "transparent", // Verhindert Ruckeln beim Wechsel
+    borderColor: "transparent",
   },
+  // Light Mode Styles
   itemHovered: {
     backgroundColor: "#E2F1FF",
     borderColor: "#C5E2FF",
   },
   itemActive: {
     backgroundColor: "#E0F2FE",
-    borderColor: "#1E40AF", // Rahmen in aktiver Schriftfarbe
+    borderColor: "#1E40AF",
   },
   itemActiveNotes: {
     backgroundColor: "#D1E9FF",
-    borderColor: "#1D4ED8", // Rahmen in aktiver Notizen-Schriftfarbe
+    borderColor: "#1D4ED8",
   },
   itemLabel: {
     fontSize: 14,
@@ -194,6 +243,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
   },
+
+  // Dark Mode Styles
+  itemHoveredDark: {
+    backgroundColor: "rgba(30, 41, 59, 0.7)",
+    borderColor: "#334155",
+  },
+  itemActiveDark: {
+    backgroundColor: "#1E293B",
+    borderColor: "#3B82F6",
+  },
+  itemActiveNotesDark: {
+    backgroundColor: "#1E293B",
+    borderColor: "#60A5FA",
+  },
+  itemLabelDark: {
+    color: "#94A3B8",
+  },
+  itemLabelHoveredDark: {
+    color: "#93C5FD",
+    fontWeight: "600",
+  },
+  itemLabelActiveDark: {
+    color: "#60A5FA",
+    fontWeight: "600",
+  },
+  itemLabelActiveNotesDark: {
+    color: "#60A5FA",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+
   footer: {
     marginTop: "auto",
     marginBottom: 16,
