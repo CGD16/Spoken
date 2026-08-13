@@ -25,10 +25,10 @@ type NavItem = {
 };
 
 const MAIN_ITEMS: NavItem[] = [
-  { key: "notes", label: "Meine Notizen", icon: "file-text" },
+  { key: "notes", label: "Notizen", icon: "file-text" },
   { key: "categories", label: "Kategorien", icon: "grid" },
-  { key: "tags", label: "Meine Tags", icon: "tag" },
-  { key: "favorites", label: "Meine Favoriten", icon: "star" },
+  { key: "tags", label: "Tags", icon: "tag" },
+  { key: "favorites", label: "Favoriten", icon: "star" },
   { key: "search", label: "Suche", icon: "search" },
   { key: "trash", label: "Papierkorb", icon: "trash-2" },
 ];

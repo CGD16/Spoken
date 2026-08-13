@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function TagsScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Meine Tags</Text>
+      <Text style={styles.title}>Papierkorb</Text>
       <Text style={styles.placeholder}>Kommt in einer späteren Version.</Text>
     </View>
   );

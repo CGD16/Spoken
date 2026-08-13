@@ -92,8 +92,11 @@ export function useNotes() {
     loadNotes();
   };
 
+  const favoriteNotes = notes.filter((note) => !!note.is_favorite);
+
   return {
     notes,
+    favoriteNotes,
     loading,
     refreshing,
     refresh,
