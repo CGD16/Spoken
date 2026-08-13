@@ -9,8 +9,8 @@ import {
 } from "expo-audio";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { PanResponder, StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -25,16 +25,17 @@ type Props = {
   onRecordingComplete: (uri: string) => void;
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export default function RecordButton({ onRecordingComplete }: Props) {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
   const isRecording = recorderState.isRecording;
 
+  const translateX = useSharedValue(0);
   const scale = useSharedValue(1);
   const pulseScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(1);
+
+  const [cancelHintVisible, setCancelHintVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -48,6 +49,7 @@ export default function RecordButton({ onRecordingComplete }: Props) {
 
   useEffect(() => {
     if (isRecording) {
+      setCancelHintVisible(true);
       pulseScale.value = withRepeat(
         withSequence(
           withTiming(1.15, {
@@ -68,6 +70,7 @@ export default function RecordButton({ onRecordingComplete }: Props) {
         true,
       );
     } else {
+      setCancelHintVisible(false);
       pulseScale.value = withTiming(1);
       pulseOpacity.value = withTiming(1);
     }
@@ -85,63 +88,126 @@ export default function RecordButton({ onRecordingComplete }: Props) {
     }
   };
 
-  const handlePress = () => {
-    scale.value = withSpring(0.95, { damping: 12, stiffness: 300 }, () => {
-      scale.value = withSpring(1, { damping: 12, stiffness: 300 });
-    });
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
+  const cancelRecording = async () => {
+    await audioRecorder.stop();
   };
 
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const isRecordingRef = useRef(isRecording);
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+
+      onPanResponderGrant: () => {
+        scale.value = withSpring(0.95);
+      },
+
+      onPanResponderMove: (_, gestureState) => {
+        if (isRecordingRef.current) {
+          // Begrenze das Wischen auf maximal ca. -120px (Länge der Textzeile)
+          if (gestureState.dx < 0) {
+            translateX.value = Math.max(gestureState.dx, -130);
+          }
+        }
+      },
+
+      onPanResponderRelease: (_, gestureState) => {
+        scale.value = withSpring(1);
+
+        if (!isRecordingRef.current) {
+          startRecording();
+        } else {
+          // Wenn der Button über die Hälfte der Zeile (ca. -80px) gezogen wurde -> Abbrechen
+          if (gestureState.dx < -80) {
+            cancelRecording();
+          } else {
+            stopRecording();
+          }
+        }
+
+        translateX.value = withSpring(0);
+      },
+
+      onPanResponderTerminate: () => {
+        scale.value = withSpring(1);
+        if (isRecordingRef.current) {
+          cancelRecording();
+        }
+        translateX.value = withSpring(0);
+      },
+    }),
+  ).current;
+
+  // Nur das Icon bewegt sich nach links
   const iconAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value === 1 ? pulseScale.value : scale.value }],
+    transform: [
+      { translateX: translateX.value },
+      { scale: scale.value === 1 ? pulseScale.value : scale.value },
+    ],
     opacity: pulseOpacity.value,
   }));
 
   return (
-    <AnimatedPressable
-      onPress={handlePress}
-      style={[styles.pill, containerAnimatedStyle]}
-    >
-      <BlurView intensity={65} tint="light" style={styles.blur}>
-        <Text style={styles.label}>
-          {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
-        </Text>
-        <Animated.View style={iconAnimatedStyle}>
-          <LinearGradient
-            colors={
-              isRecording ? ["#FCA5A5", "#EF4444"] : ["#93C5FD", "#6EE7B7"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.iconCircle}
+    <View style={styles.wrapper}>
+      {cancelHintVisible && (
+        <View style={styles.cancelHintContainer}>
+          <Feather name="trash-2" size={18} color="#EF4444" />
+        </View>
+      )}
+
+      <View style={styles.pill}>
+        <BlurView intensity={65} tint="light" style={styles.blur}>
+          <Text style={styles.label}>
+            {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
+          </Text>
+
+          {/* Der PanResponder liegt jetzt nur auf dem runden Button */}
+          <Animated.View
+            {...panResponder.panHandlers}
+            style={iconAnimatedStyle}
           >
-            <Feather name="mic" size={20} color="#fff" />
-          </LinearGradient>
-        </Animated.View>
-      </BlurView>
-    </AnimatedPressable>
+            <LinearGradient
+              colors={
+                isRecording ? ["#EF4444", "#DC2626"] : ["#3B82F6", "#10B981"]
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.iconCircle}
+            >
+              <Feather name="mic" size={20} color="#fff" />
+            </LinearGradient>
+          </Animated.View>
+        </BlurView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cancelHintContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+    backgroundColor: "rgba(254, 226, 226, 0.9)",
+  },
   pill: {
     borderRadius: 9999,
-    // iOS / Native Schatten
     shadowColor: "#1E293B",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
-    // Android Schatten
     elevation: 8,
-    // Web Schatten (verhindert das Abschneiden durch overflow)
     boxShadow: "0px 6px 20px rgba(30, 41, 59, 0.12)",
   },
   blur: {
