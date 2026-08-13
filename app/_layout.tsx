@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.tsx
-import { View, useWindowDimensions } from 'react-native';
-import { Slot, usePathname, useRouter } from 'expo-router';
-import SidebarNavigation from '@/components/SidebarNavigation';
+import { View, useWindowDimensions } from "react-native";
+import { Slot, usePathname, useRouter } from "expo-router";
+import SidebarNavigation from "@/components/SidebarNavigation";
 
 type TabKey =
   | "notes"
@@ -19,7 +19,7 @@ const TAB_TO_PATH: Record<TabKey, string> = {
   favorites: "/favorites",
   search: "/search",
   settings: "/settings",
-  trash: "trash",
+  trash: "/trash",
 };
 
 const PATH_TO_TAB: Record<string, TabKey> = {
@@ -29,7 +29,7 @@ const PATH_TO_TAB: Record<string, TabKey> = {
   "/favorites": "favorites",
   "/search": "search",
   "/settings": "settings",
-  "/trash": 'trash',
+  "/trash": "trash",
 };
 
 export default function TabLayout() {
@@ -38,10 +38,10 @@ export default function TabLayout() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
 
-  const activeTab = PATH_TO_TAB[pathname] ?? 'notes';
+  const activeTab = PATH_TO_TAB[pathname] ?? "notes";
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View style={{ flex: 1, flexDirection: "row" }}>
       <SidebarNavigation
         activeTab={activeTab}
         onTabChange={(tab) => router.push(TAB_TO_PATH[tab] as any)}

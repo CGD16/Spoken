@@ -23,8 +23,15 @@ export default function NoteCard({
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.cardHeader}>
+        {/* Einfaches Standard-Datum ohne Context/Provider */}
         <Text style={styles.cardDate}>
-          {new Date(note.created_at).toLocaleDateString("de-DE")}
+          {new Date(note.created_at).toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </Text>
 
         <View style={styles.cardHeaderIcons}>
