@@ -8,6 +8,7 @@ type Props = {
   onClose: () => void;
   onRenameTitle: () => void;
   onEditTags: () => void;
+  onEditResult: () => void;
   onDelete: () => void;
 };
 
@@ -16,6 +17,7 @@ export default function EditMenu({
   onClose,
   onRenameTitle,
   onEditTags,
+  onEditResult,
   onDelete,
 }: Props) {
   const handle = (fn: () => void) => {
@@ -38,6 +40,7 @@ export default function EditMenu({
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.content}>
+            {/* 1. Titel bearbeiten */}
             <Pressable onPress={() => handle(onRenameTitle)}>
               {({ hovered }) => (
                 <View style={[styles.option, hovered && styles.optionHovered]}>
@@ -52,12 +55,13 @@ export default function EditMenu({
                       hovered && styles.optionTextHovered,
                     ]}
                   >
-                    Titel umbenennen
+                    Titel bearbeiten
                   </Text>
                 </View>
               )}
             </Pressable>
 
+            {/* 2. Tags bearbeiten */}
             <Pressable onPress={() => handle(onEditTags)}>
               {({ hovered }) => (
                 <View style={[styles.option, hovered && styles.optionHovered]}>
@@ -78,8 +82,30 @@ export default function EditMenu({
               )}
             </Pressable>
 
+            {/* 3. Ergebnis bearbeiten */}
+            <Pressable onPress={() => handle(onEditResult)}>
+              {({ hovered }) => (
+                <View style={[styles.option, hovered && styles.optionHovered]}>
+                  <Feather
+                    name="align-left"
+                    size={20}
+                    color={hovered ? "#1E40AF" : "#2563EB"}
+                  />
+                  <Text
+                    style={[
+                      styles.optionText,
+                      hovered && styles.optionTextHovered,
+                    ]}
+                  >
+                    Ergebnis bearbeiten
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+
             <View style={styles.divider} />
 
+            {/* Löschen */}
             <Pressable onPress={() => handle(onDelete)}>
               {({ hovered }) => (
                 <View

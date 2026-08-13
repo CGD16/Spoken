@@ -71,6 +71,12 @@ export function useNotes() {
     loadNotes();
   };
 
+  // Neu hinzugefügt:
+  const saveResult = async (noteId: string, summary: string) => {
+    await supabase.from('notes').update({ summary }).eq('id', noteId);
+    loadNotes();
+  };
+
   const remove = async (noteId: string) => {
     await deleteNoteApi(noteId);
     loadNotes();
@@ -86,6 +92,7 @@ export function useNotes() {
     toggleFavorite,
     renameTitle,
     saveTags,
+    saveResult, // Neu hinzugefügt
     remove,
   };
 }

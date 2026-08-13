@@ -18,6 +18,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import EditMenu from "@/components/EditMenu";
 import RenameTitleDialog from "@/components/RenameTitleDialog";
 import EditTagsDialog from "@/components/EditTagsDialog";
+import EditResultDialog from "@/components/EditResultDialog";
 
 export default function NotesListScreen() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function NotesListScreen() {
     toggleFavorite,
     renameTitle,
     saveTags,
+    saveResult,
     remove,
   } = useNotes();
 
@@ -42,6 +44,7 @@ export default function NotesListScreen() {
   const [editMenuVisible, setEditMenuVisible] = useState(false);
   const [renameDialogVisible, setRenameDialogVisible] = useState(false);
   const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
+  const [resultDialogVisible, setResultDialogVisible] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const handleRecordingComplete = (uri: string) => {
@@ -95,6 +98,17 @@ export default function NotesListScreen() {
       setEditTargetNote(null);
     } catch (err) {
       console.error("Fehler beim Speichern der Tags:", err);
+    }
+  };
+
+  const handleSaveResult = async (newResult: string) => {
+    if (!editTargetNote) return;
+    try {
+      await saveResult(editTargetNote.id, newResult);
+      setResultDialogVisible(false);
+      setEditTargetNote(null);
+    } catch (err) {
+      console.error("Fehler beim Speichern des Ergebnisses:", err);
     }
   };
 
@@ -159,6 +173,7 @@ export default function NotesListScreen() {
         onClose={() => setEditMenuVisible(false)}
         onRenameTitle={() => setRenameDialogVisible(true)}
         onEditTags={() => setTagsDialogVisible(true)}
+        onEditResult={() => setResultDialogVisible(true)}
         onDelete={() => editTargetNote && setDeleteTargetId(editTargetNote.id)}
       />
 
@@ -178,6 +193,18 @@ export default function NotesListScreen() {
         onSave={handleSaveTags}
         onCancel={() => {
           setTagsDialogVisible(false);
+          setEditTargetNote(null);
+        }}
+      />
+
+      <EditResultDialog
+        visible={resultDialogVisible}
+        initialResult={
+          editTargetNote?.processed_text ?? editTargetNote?.raw_transcript ?? ""
+        }
+        onSave={handleSaveResult}
+        onCancel={() => {
+          setResultDialogVisible(false);
           setEditTargetNote(null);
         }}
       />

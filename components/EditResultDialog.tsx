@@ -1,4 +1,4 @@
-// components/RenameTitleDialog.tsx
+// components/EditResultDialog.tsx
 import { useEffect, useState } from "react";
 import {
   Modal,
@@ -11,22 +11,22 @@ import {
 
 type Props = {
   visible: boolean;
-  initialTitle: string;
-  onSave: (title: string) => void;
+  initialResult: string;
+  onSave: (result: string) => void;
   onCancel: () => void;
 };
 
-export default function RenameTitleDialog({
+export default function EditResultDialog({
   visible,
-  initialTitle,
+  initialResult,
   onSave,
   onCancel,
 }: Props) {
-  const [title, setTitle] = useState(initialTitle);
+  const [result, setResult] = useState(initialResult);
 
   useEffect(() => {
-    if (visible) setTitle(initialTitle);
-  }, [visible, initialTitle]);
+    if (visible) setResult(initialResult);
+  }, [visible, initialResult]);
 
   return (
     <Modal
@@ -37,13 +37,15 @@ export default function RenameTitleDialog({
     >
       <View style={styles.backdrop}>
         <View style={styles.dialog}>
-          <Text style={styles.title}>Titel bearbeiten</Text>
+          <Text style={styles.title}>Ergebnis bearbeiten</Text>
           <TextInput
             style={styles.input}
-            value={title}
-            onChangeText={setTitle}
+            value={result}
+            onChangeText={setResult}
             autoFocus
-            placeholder="Titel eingeben..."
+            multiline
+            textAlignVertical="top"
+            placeholder="Ergebnis-Text eingeben..."
           />
           <View style={styles.buttonRow}>
             <Pressable style={styles.cancelButton} onPress={onCancel}>
@@ -51,7 +53,7 @@ export default function RenameTitleDialog({
             </Pressable>
             <Pressable
               style={styles.confirmButton}
-              onPress={() => title.trim() && onSave(title.trim())}
+              onPress={() => result.trim() && onSave(result.trim())}
             >
               <Text style={styles.confirmText}>Speichern</Text>
             </Pressable>
@@ -75,7 +77,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     width: "100%",
-    maxWidth: 340,
+    maxWidth: 480,
     gap: 12,
   },
   title: { fontSize: 17, fontWeight: "700", color: "#1c2b39" },
@@ -86,6 +88,8 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 15,
     color: "#1c2b39",
+    minHeight: 140,
+    maxHeight: 300,
   },
   buttonRow: {
     flexDirection: "row",
