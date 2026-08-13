@@ -20,12 +20,18 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   onRecordingComplete: (uri: string) => void;
 };
 
 export default function RecordButton({ onRecordingComplete }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const isDark = colorScheme === "dark";
+
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(audioRecorder);
   const isRecording = recorderState.isRecording;
@@ -108,7 +114,6 @@ export default function RecordButton({ onRecordingComplete }: Props) {
 
       onPanResponderMove: (_, gestureState) => {
         if (isRecordingRef.current) {
-          // Begrenze das Wischen auf maximal ca. -120px (Länge der Textzeile)
           if (gestureState.dx < 0) {
             translateX.value = Math.max(gestureState.dx, -130);
           }
@@ -121,7 +126,6 @@ export default function RecordButton({ onRecordingComplete }: Props) {
         if (!isRecordingRef.current) {
           startRecording();
         } else {
-          // Wenn der Button über die Hälfte der Zeile (ca. -80px) gezogen wurde -> Abbrechen
           if (gestureState.dx < -80) {
             cancelRecording();
           } else {
@@ -142,7 +146,6 @@ export default function RecordButton({ onRecordingComplete }: Props) {
     }),
   ).current;
 
-  // Nur das Icon bewegt sich nach links
   const iconAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -154,25 +157,51 @@ export default function RecordButton({ onRecordingComplete }: Props) {
   return (
     <View style={styles.wrapper}>
       {cancelHintVisible && (
-        <View style={styles.cancelHintContainer}>
-          <Feather name="trash-2" size={18} color="#EF4444" />
+        <View
+          style={[
+            styles.cancelHintContainer,
+            { backgroundColor: theme.deleteHoverBg },
+          ]}
+        >
+          <Feather name="trash-2" size={18} color={theme.danger} />
         </View>
       )}
 
-      <View style={styles.pill}>
-        <BlurView intensity={65} tint="light" style={styles.blur}>
-          <Text style={styles.label}>
+      <View
+        style={[
+          styles.pill,
+          {
+            shadowColor: theme.shadowColor,
+            boxShadow: isDark
+              ? "0px 6px 20px rgba(0, 0, 0, 0.4)"
+              : "0px 6px 20px rgba(30, 41, 59, 0.12)",
+          },
+        ]}
+      >
+        <BlurView
+          intensity={65}
+          tint={isDark ? "dark" : "light"}
+          style={[
+            styles.blur,
+            {
+              backgroundColor: theme.sheetBackground,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <Text style={[styles.label, { color: theme.text }]}>
             {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
           </Text>
 
-          {/* Der PanResponder liegt jetzt nur auf dem runden Button */}
           <Animated.View
             {...panResponder.panHandlers}
             style={iconAnimatedStyle}
           >
             <LinearGradient
               colors={
-                isRecording ? ["#EF4444", "#DC2626"] : ["#3B82F6", "#10B981"]
+                isRecording
+                  ? [theme.danger, theme.dangerHover]
+                  : [theme.primary, theme.success]
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -199,16 +228,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
-    backgroundColor: "rgba(254, 226, 226, 0.9)",
   },
   pill: {
     borderRadius: 9999,
-    shadowColor: "#1E293B",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 8,
-    boxShadow: "0px 6px 20px rgba(30, 41, 59, 0.12)",
   },
   blur: {
     flexDirection: "row",
@@ -218,14 +244,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 9999,
     overflow: "hidden",
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderWidth: 1,
-    borderColor: "rgba(225, 232, 240, 0.7)",
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#1A202C",
     marginRight: 10,
   },
   iconCircle: {

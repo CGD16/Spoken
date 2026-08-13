@@ -4,7 +4,8 @@ import { Slot, usePathname, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import SidebarNavigation from "@/components/SidebarNavigation";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type TabKey =
   | "notes"
@@ -41,41 +42,33 @@ function MainLayout() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
 
-  const { isDarkMode } = useTheme();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const isDark = colorScheme === "dark";
+
   const { isLoading } = useAuth();
 
   const activeTab = PATH_TO_TAB[pathname] ?? "notes";
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: "row",
-        backgroundColor: isDarkMode ? "#0f172a" : "#f8fafc",
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SidebarNavigation
         activeTab={activeTab}
         onTabChange={(tab) => router.push(TAB_TO_PATH[tab] as any)}
         defaultCollapsed={!isWide}
       />
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: isDarkMode ? "#0f172a" : "#f8fafc",
-        }}
-      >
+      <View style={[styles.content, { backgroundColor: theme.background }]}>
         <Slot />
       </View>
-      <StatusBar style={isDarkMode ? "light" : "dark"} />
+      <StatusBar style={isDark ? "light" : "dark"} />
     </View>
   );
 }
@@ -83,9 +76,13 @@ function MainLayout() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <MainLayout />
-      </ThemeProvider>
+      <MainLayout />
     </AuthProvider>
   );
 }
+
+const styles = {
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, flexDirection: "row" },
+  content: { flex: 1 },
+} as const;

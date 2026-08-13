@@ -9,6 +9,8 @@ import {
   StyleSheet,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   visible: boolean;
@@ -23,6 +25,9 @@ export default function EditTagsDialog({
   onSave,
   onCancel,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const [tags, setTags] = useState<string[]>(initialTags);
   const [newTag, setNewTag] = useState("");
 
@@ -49,43 +54,79 @@ export default function EditTagsDialog({
       animationType="fade"
       onRequestClose={onCancel}
     >
-      <View style={styles.backdrop}>
-        <View style={styles.dialog}>
-          <Text style={styles.title}>Tags bearbeiten</Text>
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.dialog, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            Tags bearbeiten
+          </Text>
 
           <View style={styles.tagRow}>
             {tags.map((tag) => (
-              <View key={tag} style={styles.tagChip}>
-                <Text style={styles.tagChipText}>{tag}</Text>
+              <View
+                key={tag}
+                style={[styles.tagChip, { backgroundColor: theme.tagBg }]}
+              >
+                <Text style={[styles.tagChipText, { color: theme.tagText }]}>
+                  {tag}
+                </Text>
                 <Pressable onPress={() => removeTag(tag)} hitSlop={8}>
-                  <Feather name="x" size={14} color="#5b6b7a" />
+                  <Feather name="x" size={14} color={theme.textMuted} />
                 </Pressable>
               </View>
             ))}
             {tags.length === 0 && (
-              <Text style={styles.emptyText}>Keine Tags</Text>
+              <Text style={[styles.emptyText, { color: theme.textSubtle }]}>
+                Keine Tags
+              </Text>
             )}
           </View>
 
           <View style={styles.addRow}>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  borderColor: theme.border,
+                  backgroundColor: theme.inputBg,
+                  color: theme.text,
+                },
+              ]}
               value={newTag}
               onChangeText={setNewTag}
               placeholder="Neuer Tag..."
+              placeholderTextColor={theme.textPlaceholder}
               onSubmitEditing={addTag}
             />
-            <Pressable style={styles.addButton} onPress={addTag}>
+            <Pressable
+              style={({ hovered }) => [
+                styles.addButton,
+                { backgroundColor: theme.primary },
+                hovered && { backgroundColor: theme.primaryHover },
+              ]}
+              onPress={addTag}
+            >
               <Feather name="plus" size={18} color="#fff" />
             </Pressable>
           </View>
 
           <View style={styles.buttonRow}>
-            <Pressable style={styles.cancelButton} onPress={onCancel}>
-              <Text style={styles.cancelText}>Abbrechen</Text>
+            <Pressable
+              style={({ hovered }) => [
+                styles.cancelButton,
+                hovered && { backgroundColor: theme.selectionBg },
+              ]}
+              onPress={onCancel}
+            >
+              <Text style={[styles.cancelText, { color: theme.textMuted }]}>
+                Abbrechen
+              </Text>
             </Pressable>
             <Pressable
-              style={styles.confirmButton}
+              style={({ hovered }) => [
+                styles.confirmButton,
+                { backgroundColor: theme.primary },
+                hovered && { backgroundColor: theme.primaryHover },
+              ]}
               onPress={() => onSave(tags)}
             >
               <Text style={styles.confirmText}>Speichern</Text>
@@ -100,37 +141,33 @@ export default function EditTagsDialog({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
   },
   dialog: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     width: "100%",
     maxWidth: 360,
     gap: 14,
   },
-  title: { fontSize: 17, fontWeight: "700", color: "#1c2b39" },
+  title: { fontSize: 17, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tagChip: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#eef6fb",
     borderRadius: 14,
     paddingVertical: 6,
     paddingHorizontal: 10,
   },
-  tagChipText: { fontSize: 13, color: "#2f95dc", fontWeight: "600" },
-  emptyText: { fontSize: 13, color: "#9aa5b1", fontStyle: "italic" },
+  tagChipText: { fontSize: 13, fontWeight: "600" },
+  emptyText: { fontSize: 13, fontStyle: "italic" },
   addRow: { flexDirection: "row", gap: 8 },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#e1e8f0",
     borderRadius: 10,
     padding: 10,
     fontSize: 14,
@@ -139,7 +176,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#2f95dc",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -150,12 +186,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   cancelButton: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 },
-  cancelText: { fontSize: 14, fontWeight: "600", color: "#5b6b7a" },
+  cancelText: { fontSize: 14, fontWeight: "600" },
   confirmButton: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: "#2f95dc",
   },
   confirmText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 });

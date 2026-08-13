@@ -1,6 +1,7 @@
 // context/ThemeContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme as useRNColorScheme } from "react-native";
 
 type ThemeContextType = {
   isDarkMode: boolean;
@@ -12,20 +13,22 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleDarkMode: () => {},
 });
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const systemColorScheme = useRNColorScheme();
+  const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === "dark");
 
   useEffect(() => {
-    AsyncStorage.getItem("@setting_dark_mode").then((value) => {
-      if (value !== null) {
-        setIsDarkMode(value === "dark" || value === "true");
+    // Gespeicherten Zustand beim Start laden
+    AsyncStorage.getItem("@setting_dark_mode").then((val) => {
+      if (val !== null) {
+        setIsDarkMode(JSON.parse(val));
       }
     });
   }, []);
 
-  const toggleDarkMode = (value: boolean) => {
+  const toggleDarkMode = async (value: boolean) => {
     setIsDarkMode(value);
-    AsyncStorage.setItem("@setting_dark_mode", value ? "dark" : "light");
+    await AsyncStorage.setItem("@setting_dark_mode", JSON.stringify(value));
   };
 
   return (
@@ -33,6 +36,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-export const useTheme = () => useContext(ThemeContext);
+// Wir exportieren es so, dass dein use-color-scheme Hook darauf zugreifen kann
+export const useAppTheme = () => useContext(ThemeContext);

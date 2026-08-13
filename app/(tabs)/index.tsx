@@ -19,9 +19,14 @@ import EditMenu from "@/components/EditMenu";
 import RenameTitleDialog from "@/components/RenameTitleDialog";
 import EditTagsDialog from "@/components/EditTagsDialog";
 import EditResultDialog from "@/components/EditResultDialog";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function NotesListScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const {
     notes,
     loading,
@@ -126,24 +131,28 @@ export default function NotesListScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Notizen</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.header, { color: theme.text }]}>Notizen</Text>
       <FlatList
         data={notes}
         keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme.primary}
+          />
         }
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
         ListEmptyComponent={
-          <Text style={styles.empty}>
+          <Text style={[styles.empty, { color: theme.textSubtle }]}>
             Noch keine Notizen - tippe unten auf 🎤
           </Text>
         }
@@ -226,15 +235,14 @@ export default function NotesListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f7f9fb" },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
     fontSize: 28,
     fontWeight: "bold",
     padding: 16,
     paddingBottom: 8,
-    color: "#1c2b39",
   },
-  empty: { textAlign: "center", color: "#9aa5b1", marginTop: 40 },
+  empty: { textAlign: "center", marginTop: 40 },
   recorderContainer: { position: "absolute", bottom: 24, right: 20 },
 });

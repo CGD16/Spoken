@@ -1,16 +1,33 @@
-import { View, Text, StyleSheet } from 'react-native';
+// app/tags.tsx (oder entsprechend deiner Dateistruktur)
+import { View, Text, StyleSheet } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TagsScreen() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tags</Text>
-      <Text style={styles.placeholder}>Kommt in einer späteren Version.</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.title, { color: theme.text }]}>Tags</Text>
+      <Text style={[styles.placeholder, { color: theme.textSubtle }]}>
+        Kommt in einer späteren Version.
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#f7f9fb' },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#1c2b39', marginBottom: 12 },
-  placeholder: { fontSize: 14, color: '#9aa5b1' },
+  container: {
+    flex: 1,
+    padding: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  placeholder: {
+    fontSize: 14,
+  },
 });

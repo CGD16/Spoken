@@ -1,5 +1,7 @@
 // components/ConfirmDialog.tsx
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   visible: boolean;
@@ -16,24 +18,50 @@ export default function ConfirmDialog({
   visible,
   title,
   message,
-  confirmLabel = 'Bestätigen',
-  cancelLabel = 'Abbrechen',
+  confirmLabel = "Bestätigen",
+  cancelLabel = "Abbrechen",
   destructive = false,
   onConfirm,
   onCancel,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.backdrop}>
-        <View style={styles.dialog}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onCancel}
+    >
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.dialog, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
+          <Text style={[styles.message, { color: theme.textMuted }]}>
+            {message}
+          </Text>
           <View style={styles.buttonRow}>
-            <Pressable style={styles.cancelButton} onPress={onCancel}>
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
+            <Pressable
+              style={({ hovered }) => [
+                styles.cancelButton,
+                hovered && { backgroundColor: theme.selectionBg },
+              ]}
+              onPress={onCancel}
+            >
+              <Text style={[styles.cancelText, { color: theme.textMuted }]}>
+                {cancelLabel}
+              </Text>
             </Pressable>
             <Pressable
-              style={[styles.confirmButton, destructive && styles.destructiveButton]}
+              style={({ hovered }) => [
+                styles.confirmButton,
+                { backgroundColor: destructive ? theme.danger : theme.primary },
+                hovered && {
+                  backgroundColor: destructive
+                    ? theme.dangerHover
+                    : theme.primaryHover,
+                },
+              ]}
               onPress={onConfirm}
             >
               <Text style={styles.confirmText}>{confirmLabel}</Text>
@@ -46,14 +74,33 @@ export default function ConfirmDialog({
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  dialog: { backgroundColor: '#fff', borderRadius: 16, padding: 20, width: '100%', maxWidth: 340, gap: 12 },
-  title: { fontSize: 17, fontWeight: '700', color: '#1c2b39' },
-  message: { fontSize: 14, color: '#5b6b7a', lineHeight: 20 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+  backdrop: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  dialog: {
+    borderRadius: 16,
+    padding: 20,
+    width: "100%",
+    maxWidth: 340,
+    gap: 12,
+  },
+  title: { fontSize: 17, fontWeight: "700" },
+  message: { fontSize: 14, lineHeight: 20 },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 8,
+  },
   cancelButton: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 },
-  cancelText: { fontSize: 14, fontWeight: '600', color: '#5b6b7a' },
-  confirmButton: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: '#2f95dc' },
-  destructiveButton: { backgroundColor: '#d9534f' },
-  confirmText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  cancelText: { fontSize: 14, fontWeight: "600" },
+  confirmButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  confirmText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 });

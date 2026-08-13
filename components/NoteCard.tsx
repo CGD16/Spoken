@@ -2,6 +2,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import type { Note } from "@/types/note";
+import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
@@ -21,16 +22,23 @@ export default function NoteCard({
 }: Props) {
   const isFav = !!note.is_favorite;
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <Pressable
-      style={[styles.card, isDark && styles.cardDark]}
+      style={({ hovered }) => [
+        styles.card,
+        {
+          backgroundColor: theme.surface,
+          borderColor: theme.border,
+          shadowColor: theme.shadowColor,
+        },
+        hovered && { borderColor: theme.primaryLight },
+      ]}
       onPress={onPress}
     >
       <View style={styles.cardHeader}>
-        {/* Einfaches Standard-Datum ohne Context/Provider */}
-        <Text style={[styles.cardDate, isDark && styles.cardDateDark]}>
+        <Text style={[styles.cardDate, { color: theme.textMuted }]}>
           {new Date(note.created_at).toLocaleDateString("de-DE", {
             day: "2-digit",
             month: "2-digit",
@@ -53,10 +61,10 @@ export default function NoteCard({
               <View
                 style={[
                   styles.iconButton,
-                  hovered &&
-                    (isDark
-                      ? styles.iconButtonHoveredDark
-                      : styles.iconButtonHovered),
+                  hovered && {
+                    backgroundColor: theme.hoverBg,
+                    borderColor: theme.borderLight,
+                  },
                 ]}
               >
                 <Ionicons
@@ -64,14 +72,10 @@ export default function NoteCard({
                   size={18}
                   color={
                     isFav
-                      ? "#EAB308"
+                      ? theme.starActive
                       : hovered
-                        ? isDark
-                          ? "#60A5FA"
-                          : "#2553B8"
-                        : isDark
-                          ? "#64748B"
-                          : "#9aa5b1"
+                        ? theme.primaryActive
+                        : theme.textMuted
                   }
                 />
               </View>
@@ -90,24 +94,16 @@ export default function NoteCard({
               <View
                 style={[
                   styles.iconButton,
-                  hovered &&
-                    (isDark
-                      ? styles.iconButtonHoveredDark
-                      : styles.iconButtonHovered),
+                  hovered && {
+                    backgroundColor: theme.hoverBg,
+                    borderColor: theme.borderLight,
+                  },
                 ]}
               >
                 <Feather
                   name="edit-2"
                   size={18}
-                  color={
-                    hovered
-                      ? isDark
-                        ? "#60A5FA"
-                        : "#2553B8"
-                      : isDark
-                        ? "#64748B"
-                        : "#9aa5b1"
-                  }
+                  color={hovered ? theme.primaryActive : theme.textMuted}
                 />
               </View>
             )}
@@ -125,24 +121,16 @@ export default function NoteCard({
               <View
                 style={[
                   styles.iconButton,
-                  hovered &&
-                    (isDark
-                      ? styles.iconButtonHoveredDark
-                      : styles.iconButtonHovered),
+                  hovered && {
+                    backgroundColor: theme.hoverBg,
+                    borderColor: theme.borderLight,
+                  },
                 ]}
               >
                 <Feather
                   name="more-horizontal"
                   size={18}
-                  color={
-                    hovered
-                      ? isDark
-                        ? "#60A5FA"
-                        : "#2553B8"
-                      : isDark
-                        ? "#64748B"
-                        : "#9aa5b1"
-                  }
+                  color={hovered ? theme.primaryActive : theme.textMuted}
                 />
               </View>
             )}
@@ -150,21 +138,21 @@ export default function NoteCard({
         </View>
       </View>
 
-      <Text style={[styles.cardTitle, isDark && styles.cardTitleDark]}>
+      <Text style={[styles.cardTitle, { color: theme.text }]}>
         {note.title ?? "Unbenannte Notiz"}
       </Text>
       <Text
-        style={[styles.cardPreview, isDark && styles.cardPreviewDark]}
+        style={[styles.cardPreview, { color: theme.textMuted }]}
         numberOfLines={2}
       >
         {note.processed_text ?? note.raw_transcript ?? "Wird verarbeitet..."}
       </Text>
       {note.tags && note.tags.length > 0 && (
-        <Text style={[styles.tags, isDark && styles.tagsDark]}>
+        <Text style={[styles.tags, { color: theme.primary }]}>
           {note.tags.join(" · ")}
         </Text>
       )}
-      <Text style={[styles.status, isDark && styles.statusDark]}>
+      <Text style={[styles.status, { color: theme.textSubtle }]}>
         {note.status}
       </Text>
       <View style={styles.miniWaveform}>
@@ -173,8 +161,10 @@ export default function NoteCard({
             key={i}
             style={[
               styles.miniBar,
-              isDark && styles.miniBarDark,
-              { height: 4 + ((i * 5) % 12) },
+              {
+                height: 4 + ((i * 5) % 12),
+                backgroundColor: theme.waveformInactive,
+              },
             ]}
           />
         ))}
@@ -185,21 +175,14 @@ export default function NoteCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     gap: 6,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
-  },
-  cardDark: {
-    backgroundColor: "#1E293B",
-    shadowOpacity: 0,
     borderWidth: 1,
-    borderColor: "#334155",
   },
   cardHeader: {
     flexDirection: "row",
@@ -207,27 +190,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardHeaderIcons: { flexDirection: "row", alignItems: "center", gap: 14 },
-  iconButton: { padding: 6, borderRadius: 8 },
-  iconButtonHovered: {
-    backgroundColor: "#E2F1FF",
+  iconButton: {
+    padding: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#C5E2FF",
+    borderColor: "transparent",
   },
-  iconButtonHoveredDark: {
-    backgroundColor: "#1E3A8A",
-    borderWidth: 1,
-    borderColor: "#1D4ED8",
-  },
-  cardDate: { fontSize: 12, color: "#9aa5b1" },
-  cardDateDark: { color: "#64748B" },
-  cardTitle: { fontSize: 16, fontWeight: "700", color: "#1c2b39" },
-  cardTitleDark: { color: "#F8FAFC" },
-  cardPreview: { fontSize: 14, color: "#5b6b7a", lineHeight: 19 },
-  cardPreviewDark: { color: "#94A3B8" },
-  tags: { fontSize: 12, color: "#2f95dc", fontWeight: "600" },
-  tagsDark: { color: "#38BDF8" },
-  status: { fontSize: 11, color: "#c2cad3" },
-  statusDark: { color: "#475569" },
+  cardDate: { fontSize: 12 },
+  cardTitle: { fontSize: 16, fontWeight: "700" },
+  cardPreview: { fontSize: 14, lineHeight: 19 },
+  tags: { fontSize: 12, fontWeight: "600" },
+  status: { fontSize: 11 },
   miniWaveform: {
     flexDirection: "row",
     alignItems: "center",
@@ -235,6 +208,5 @@ const styles = StyleSheet.create({
     height: 16,
     marginTop: 4,
   },
-  miniBar: { width: 2, borderRadius: 1, backgroundColor: "#cfe4f0" },
-  miniBarDark: { backgroundColor: "#334155" },
+  miniBar: { width: 2, borderRadius: 1 },
 });

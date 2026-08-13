@@ -8,6 +8,8 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   visible: boolean;
@@ -22,6 +24,9 @@ export default function EditResultDialog({
   onSave,
   onCancel,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const [result, setResult] = useState(initialResult);
 
   useEffect(() => {
@@ -35,24 +40,46 @@ export default function EditResultDialog({
       animationType="fade"
       onRequestClose={onCancel}
     >
-      <View style={styles.backdrop}>
-        <View style={styles.dialog}>
-          <Text style={styles.title}>Ergebnis bearbeiten</Text>
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.dialog, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            Ergebnis bearbeiten
+          </Text>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                borderColor: theme.border,
+                backgroundColor: theme.inputBg,
+                color: theme.text,
+              },
+            ]}
             value={result}
             onChangeText={setResult}
             autoFocus
             multiline
             textAlignVertical="top"
             placeholder="Ergebnis-Text eingeben..."
+            placeholderTextColor={theme.textPlaceholder}
           />
           <View style={styles.buttonRow}>
-            <Pressable style={styles.cancelButton} onPress={onCancel}>
-              <Text style={styles.cancelText}>Abbrechen</Text>
+            <Pressable
+              style={({ hovered }) => [
+                styles.cancelButton,
+                hovered && { backgroundColor: theme.selectionBg },
+              ]}
+              onPress={onCancel}
+            >
+              <Text style={[styles.cancelText, { color: theme.textMuted }]}>
+                Abbrechen
+              </Text>
             </Pressable>
             <Pressable
-              style={styles.confirmButton}
+              style={({ hovered }) => [
+                styles.confirmButton,
+                { backgroundColor: theme.primary },
+                hovered && { backgroundColor: theme.primaryHover },
+              ]}
               onPress={() => result.trim() && onSave(result.trim())}
             >
               <Text style={styles.confirmText}>Speichern</Text>
@@ -67,27 +94,23 @@ export default function EditResultDialog({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
   },
   dialog: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     width: "100%",
     maxWidth: 480,
     gap: 12,
   },
-  title: { fontSize: 17, fontWeight: "700", color: "#1c2b39" },
+  title: { fontSize: 17, fontWeight: "700" },
   input: {
     borderWidth: 1,
-    borderColor: "#e1e8f0",
     borderRadius: 10,
     padding: 12,
     fontSize: 15,
-    color: "#1c2b39",
     minHeight: 140,
     maxHeight: 300,
   },
@@ -98,12 +121,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   cancelButton: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 },
-  cancelText: { fontSize: 14, fontWeight: "600", color: "#5b6b7a" },
+  cancelText: { fontSize: 14, fontWeight: "600" },
   confirmButton: {
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: "#2f95dc",
   },
   confirmText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 });

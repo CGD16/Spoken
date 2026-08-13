@@ -10,6 +10,8 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export type NoteMode =
   | "todo"
@@ -48,6 +50,10 @@ export default function ModeActionSheet({
   onSelect,
   onDelete,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const isDarkMode = colorScheme === "dark";
+
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState("");
 
@@ -85,11 +91,23 @@ export default function ModeActionSheet({
       animationType="slide"
       onRequestClose={handleClose}
     >
-      <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+      <Pressable
+        style={[styles.backdrop, { backgroundColor: theme.backdrop }]}
+        onPress={handleClose}
+      >
+        <Pressable
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: theme.sheetBackground,
+              borderColor: theme.border,
+            },
+          ]}
+          onPress={(e) => e.stopPropagation()}
+        >
           <BlurView
             intensity={45}
-            tint="light"
+            tint={isDarkMode ? "dark" : "light"}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.content}>
@@ -103,18 +121,27 @@ export default function ModeActionSheet({
                         <View
                           style={[
                             styles.option,
-                            hovered && styles.optionHovered,
+                            hovered && {
+                              backgroundColor: theme.hoverBg,
+                              borderColor: theme.borderLight,
+                            },
                           ]}
                         >
                           <Feather
                             name={config.icon}
                             size={20}
-                            color="#2563EB"
+                            color={
+                              hovered ? theme.primaryActive : theme.primary
+                            }
                           />
                           <Text
                             style={[
                               styles.optionText,
-                              hovered && styles.optionTextHovered,
+                              { color: theme.text },
+                              hovered && {
+                                color: theme.primaryActive,
+                                fontWeight: "600",
+                              },
                             ]}
                           >
                             {config.label}
@@ -127,24 +154,33 @@ export default function ModeActionSheet({
 
                 {onDelete && (
                   <>
-                    <View style={styles.divider} />
+                    <View
+                      style={[
+                        styles.divider,
+                        { backgroundColor: theme.borderLight },
+                      ]}
+                    />
                     <Pressable onPress={handleDeletePress}>
                       {({ hovered }) => (
                         <View
                           style={[
                             styles.option,
-                            hovered && styles.deleteHovered,
+                            hovered && {
+                              backgroundColor: theme.deleteHoverBg,
+                              borderColor: theme.dangerLight,
+                            },
                           ]}
                         >
                           <Feather
                             name="trash-2"
                             size={20}
-                            color={hovered ? "#DC2626" : "#E53E3E"}
+                            color={theme.danger}
                           />
                           <Text
                             style={[
                               styles.deleteText,
-                              hovered && styles.deleteTextHovered,
+                              { color: theme.danger },
+                              hovered && { fontWeight: "600" },
                             ]}
                           >
                             Notiz löschen
@@ -159,19 +195,33 @@ export default function ModeActionSheet({
 
             {customMode && (
               <View style={styles.customContainer}>
-                <Text style={styles.titleText}>
+                <Text style={[styles.titleText, { color: theme.primary }]}>
                   Was soll damit gemacht werden?
                 </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: theme.border,
+                      backgroundColor: theme.inputBg,
+                      color: theme.text,
+                    },
+                  ]}
                   placeholder="z.B. Fasse als Haiku zusammen"
-                  placeholderTextColor="#A0AEC0"
+                  placeholderTextColor={theme.textPlaceholder}
                   value={customText}
                   onChangeText={setCustomText}
                   autoFocus
                   multiline
                 />
-                <Pressable style={styles.submitButton} onPress={submitCustom}>
+                <Pressable
+                  style={({ hovered }) => [
+                    styles.submitButton,
+                    { backgroundColor: theme.primary },
+                    hovered && { backgroundColor: theme.primaryHover },
+                  ]}
+                  onPress={submitCustom}
+                >
                   <Text style={styles.submitButtonText}>Anwenden</Text>
                 </Pressable>
               </View>
@@ -186,16 +236,13 @@ export default function ModeActionSheet({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "rgba(240, 246, 255, 0.85)",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: "rgba(225, 232, 240, 0.6)",
     overflow: "hidden",
   },
   content: {
@@ -212,23 +259,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "transparent",
   },
-  optionHovered: {
-    backgroundColor: "#E2F1FF",
-    borderColor: "#C5E2FF",
-  },
   optionText: {
     fontSize: 14,
-    color: "#4A5568",
     fontWeight: "500",
-  },
-  optionTextHovered: {
-    color: "#2553B8",
-    fontWeight: "600",
   },
   titleText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#1E40AF",
   },
   customContainer: {
     gap: 12,
@@ -236,17 +273,13 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "rgba(225, 232, 240, 0.8)",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
     borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    color: "#4A5568",
     minHeight: 80,
     textAlignVertical: "top",
   },
   submitButton: {
-    backgroundColor: "#2563EB",
     borderRadius: 12,
     padding: 14,
     alignItems: "center",
@@ -258,20 +291,10 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "rgba(225, 232, 240, 0.6)",
     marginVertical: 8,
   },
   deleteText: {
     fontSize: 14,
-    color: "#DC2626",
     fontWeight: "500",
-  },
-  deleteHovered: {
-    backgroundColor: "#FEE2E2",
-    borderColor: "#FCA5A5",
-  },
-  deleteTextHovered: {
-    color: "#B91C1C",
-    fontWeight: "600",
   },
 });

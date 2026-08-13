@@ -2,6 +2,8 @@
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   visible: boolean;
@@ -20,6 +22,10 @@ export default function EditMenu({
   onEditResult,
   onDelete,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const isDarkMode = colorScheme === "dark";
+
   const handle = (fn: () => void) => {
     onClose();
     fn();
@@ -32,27 +38,48 @@ export default function EditMenu({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+      <Pressable
+        style={[styles.backdrop, { backgroundColor: theme.backdrop }]}
+        onPress={onClose}
+      >
+        <Pressable
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: theme.sheetBackground,
+              borderColor: theme.border,
+            },
+          ]}
+          onPress={(e) => e.stopPropagation()}
+        >
           <BlurView
             intensity={45}
-            tint="light"
+            tint={isDarkMode ? "dark" : "light"}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.content}>
             {/* 1. Titel bearbeiten */}
             <Pressable onPress={() => handle(onRenameTitle)}>
               {({ hovered }) => (
-                <View style={[styles.option, hovered && styles.optionHovered]}>
+                <View
+                  style={[
+                    styles.option,
+                    hovered && { backgroundColor: theme.hoverBg },
+                  ]}
+                >
                   <Feather
                     name="edit-3"
                     size={20}
-                    color={hovered ? "#1E40AF" : "#2563EB"}
+                    color={hovered ? theme.primaryActive : theme.primary}
                   />
                   <Text
                     style={[
                       styles.optionText,
-                      hovered && styles.optionTextHovered,
+                      { color: theme.text },
+                      hovered && {
+                        color: theme.primaryActive,
+                        fontWeight: "600",
+                      },
                     ]}
                   >
                     Titel bearbeiten
@@ -64,16 +91,25 @@ export default function EditMenu({
             {/* 2. Tags bearbeiten */}
             <Pressable onPress={() => handle(onEditTags)}>
               {({ hovered }) => (
-                <View style={[styles.option, hovered && styles.optionHovered]}>
+                <View
+                  style={[
+                    styles.option,
+                    hovered && { backgroundColor: theme.hoverBg },
+                  ]}
+                >
                   <Feather
                     name="tag"
                     size={20}
-                    color={hovered ? "#1E40AF" : "#2563EB"}
+                    color={hovered ? theme.primaryActive : theme.primary}
                   />
                   <Text
                     style={[
                       styles.optionText,
-                      hovered && styles.optionTextHovered,
+                      { color: theme.text },
+                      hovered && {
+                        color: theme.primaryActive,
+                        fontWeight: "600",
+                      },
                     ]}
                   >
                     Tags bearbeiten
@@ -85,16 +121,25 @@ export default function EditMenu({
             {/* 3. Ergebnis bearbeiten */}
             <Pressable onPress={() => handle(onEditResult)}>
               {({ hovered }) => (
-                <View style={[styles.option, hovered && styles.optionHovered]}>
+                <View
+                  style={[
+                    styles.option,
+                    hovered && { backgroundColor: theme.hoverBg },
+                  ]}
+                >
                   <Feather
                     name="align-left"
                     size={20}
-                    color={hovered ? "#1E40AF" : "#2563EB"}
+                    color={hovered ? theme.primaryActive : theme.primary}
                   />
                   <Text
                     style={[
                       styles.optionText,
-                      hovered && styles.optionTextHovered,
+                      { color: theme.text },
+                      hovered && {
+                        color: theme.primaryActive,
+                        fontWeight: "600",
+                      },
                     ]}
                   >
                     Ergebnis bearbeiten
@@ -103,16 +148,23 @@ export default function EditMenu({
               )}
             </Pressable>
 
-            <View style={styles.divider} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.borderLight }]}
+            />
 
             {/* Löschen */}
             <Pressable onPress={() => handle(onDelete)}>
               {({ hovered }) => (
                 <View
-                  style={[styles.option, hovered && styles.optionDeleteHovered]}
+                  style={[
+                    styles.option,
+                    hovered && { backgroundColor: theme.deleteHoverBg },
+                  ]}
                 >
-                  <Feather name="trash-2" size={20} color="#DC2626" />
-                  <Text style={styles.deleteText}>Löschen</Text>
+                  <Feather name="trash-2" size={20} color={theme.danger} />
+                  <Text style={[styles.deleteText, { color: theme.danger }]}>
+                    Löschen
+                  </Text>
                 </View>
               )}
             </Pressable>
@@ -126,16 +178,13 @@ export default function EditMenu({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "rgba(240, 246, 255, 0.95)",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: "rgba(225, 232, 240, 0.8)",
     overflow: "hidden",
   },
   content: { padding: 16, gap: 4 },
@@ -147,14 +196,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
   },
-  optionHovered: { backgroundColor: "#E0F2FE" },
-  optionDeleteHovered: { backgroundColor: "#FEE2E2" },
-  optionText: { fontSize: 14, color: "#4A5568", fontWeight: "500" },
-  optionTextHovered: { color: "#1E40AF", fontWeight: "600" },
-  deleteText: { fontSize: 14, color: "#DC2626", fontWeight: "600" },
+  optionText: { fontSize: 14, fontWeight: "500" },
+  deleteText: { fontSize: 14, fontWeight: "600" },
   divider: {
     height: 1,
-    backgroundColor: "rgba(225, 232, 240, 0.6)",
     marginVertical: 8,
   },
 });
