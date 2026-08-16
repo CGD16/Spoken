@@ -7,34 +7,51 @@ import {
   ScrollView,
   Switch,
   TouchableOpacity,
+  DeviceEventEmitter,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function SettingsScreen() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { colorScheme, themeName, setTheme } = useColorScheme();
+
+  // Robuste Theme-Auflösung mit Fallback auf Blau
+  const rawTheme =
+    (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
+    Themes.blue[colorScheme ?? "light"];
+
+  const theme = {
+    ...Themes.blue[colorScheme ?? "light"],
+    ...rawTheme,
+  };
+
+  const [isDarkMode, setIsDarkMode] = useState(colorScheme === "dark");
+  const [currentThemeName, setCurrentThemeName] = useState(themeName);
   const [language, setLanguage] = useState<"de" | "en">("de");
   const [dateFormat, setDateFormat] = useState<
     "DD.MM.YYYY" | "YYYY-MM-DD" | "MM/DD/YYYY"
   >("DD.MM.YYYY");
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">("24h");
 
-  const theme = Colors[isDarkMode ? "dark" : "light"];
-
   // Alle Einstellungen beim Start laden
   useEffect(() => {
     loadSettings();
   }, []);
 
+  // Synchronisieren, falls sich der Zustand von außen ändert
+  useEffect(() => {
+    setIsDarkMode(colorScheme === "dark");
+    setCurrentThemeName(themeName);
+  }, [colorScheme, themeName]);
+
   const loadSettings = async () => {
     try {
-      const savedDark = await AsyncStorage.getItem("@setting_dark_mode");
       const savedLang = await AsyncStorage.getItem("@setting_language");
       const savedDate = await AsyncStorage.getItem("@setting_date_format");
       const savedTime = await AsyncStorage.getItem("@setting_time_format");
 
-      if (savedDark !== null) setIsDarkMode(JSON.parse(savedDark));
       if (savedLang) setLanguage(savedLang as "de" | "en");
       if (savedDate) setDateFormat(savedDate as any);
       if (savedTime) setTimeFormat(savedTime as any);
@@ -54,9 +71,18 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleDarkModeToggle = (value: boolean) => {
+  const handleDarkModeToggle = async (value: boolean) => {
     setIsDarkMode(value);
-    saveSetting("@setting_dark_mode", value);
+    const newColorScheme = value ? "dark" : "light";
+    await AsyncStorage.setItem("@setting_dark_mode", JSON.stringify(value));
+    await setTheme(currentThemeName, newColorScheme);
+    DeviceEventEmitter.emit("onThemeChange", value);
+  };
+
+  const handleThemeColorChange = async (newThemeName: string) => {
+    setCurrentThemeName(newThemeName);
+    const activeColorScheme = isDarkMode ? "dark" : "light";
+    await setTheme(newThemeName, activeColorScheme);
   };
 
   const handleLanguageChange = (lang: "de" | "en") => {
@@ -75,6 +101,15 @@ export default function SettingsScreen() {
     setTimeFormat(format);
     saveSetting("@setting_time_format", format);
   };
+
+  const themeOptions = [
+    { label: "Blau (Standard)", value: "blue", color: "#2f95dc" },
+    { label: "Rosa", value: "pink", color: "#e64980" },
+    { label: "Grün", value: "green", color: "#2b8a3e" },
+    { label: "Rot", value: "red", color: "#e03131" },
+    { label: "Gelb", value: "yellow", color: "#f59f00" },
+    { label: "Violett", value: "violet", color: "#9c36b5" },
+  ];
 
   return (
     <ScrollView
@@ -111,6 +146,51 @@ export default function SettingsScreen() {
             thumbColor="#FFFFFF"
           />
         </View>
+      </View>
+
+      {/* Farbthema */}
+      <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
+        Farbthema
+      </Text>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: theme.surface, borderColor: theme.border },
+        ]}
+      >
+        {themeOptions.map((item, index) => (
+          <View key={item.value}>
+            {index > 0 && (
+              <View
+                style={[styles.divider, { backgroundColor: theme.selectionBg }]}
+              />
+            )}
+            <TouchableOpacity
+              style={[
+                styles.optionRow,
+                currentThemeName === item.value && {
+                  backgroundColor: theme.selectionBg,
+                },
+              ]}
+              onPress={() => handleThemeColorChange(item.value)}
+            >
+              <View style={styles.rowLeft}>
+                <View
+                  style={[
+                    styles.colorIndicator,
+                    { backgroundColor: item.color },
+                  ]}
+                />
+                <Text style={[styles.optionLabel, { color: theme.text }]}>
+                  {item.label}
+                </Text>
+              </View>
+              {currentThemeName === item.value && (
+                <Feather name="check" size={18} color={theme.primary} />
+              )}
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
 
       {/* Sprache */}
@@ -283,5 +363,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   optionLabel: { fontSize: 15, fontWeight: "500" },
+  colorIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
   divider: { height: 1 },
 });

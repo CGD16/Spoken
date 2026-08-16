@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
@@ -28,8 +28,18 @@ type Props = {
 };
 
 export default function RecordButton({ onRecordingComplete }: Props) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+
+  // Robuste Theme-Auflösung mit Fallback auf Blau
+  const rawTheme =
+    (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
+    Themes.blue[colorScheme ?? "light"];
+
+  const theme = {
+    ...Themes.blue[colorScheme ?? "light"],
+    ...rawTheme,
+  };
+
   const isDark = colorScheme === "dark";
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);

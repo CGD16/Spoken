@@ -1,14 +1,16 @@
 // components/AudioPlayer.tsx
 import { View, Pressable, Text, StyleSheet } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = { uri: string | null };
 
 export default function AudioPlayer({ uri }: Props) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+  const theme =
+    Themes[themeName as keyof typeof Themes]?.[colorScheme] ??
+    Themes.blue[colorScheme];
 
   const player = useAudioPlayer(uri ?? undefined);
   const status = useAudioPlayerStatus(player);

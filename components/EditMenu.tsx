@@ -2,7 +2,7 @@
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
@@ -22,8 +22,18 @@ export default function EditMenu({
   onEditResult,
   onDelete,
 }: Props) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+
+  // Robuste Theme-Auflösung mit Fallback auf Blau
+  const rawTheme =
+    (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
+    Themes.blue[colorScheme ?? "light"];
+
+  const theme = {
+    ...Themes.blue[colorScheme ?? "light"],
+    ...rawTheme,
+  };
+
   const isDarkMode = colorScheme === "dark";
 
   const handle = (fn: () => void) => {

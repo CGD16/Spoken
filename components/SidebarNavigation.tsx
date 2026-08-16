@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from "react-native-reanimated";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type TabKey =
@@ -55,8 +55,18 @@ export default function SidebarNavigation({
   onTabChange,
   defaultCollapsed = false,
 }: Props) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+
+  // Sichere Auflösung des Themes mit Fallback auf Blau (verhindert undefined properties)
+  const rawTheme =
+    (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
+    Themes.blue[colorScheme ?? "light"];
+
+  const theme = {
+    ...Themes.blue[colorScheme ?? "light"],
+    ...rawTheme,
+  };
+
   const isDark = colorScheme === "dark";
 
   const [collapsed, setCollapsed] = useState(defaultCollapsed);

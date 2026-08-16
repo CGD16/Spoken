@@ -19,13 +19,22 @@ import EditMenu from "@/components/EditMenu";
 import RenameTitleDialog from "@/components/RenameTitleDialog";
 import EditTagsDialog from "@/components/EditTagsDialog";
 import EditResultDialog from "@/components/EditResultDialog";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function NotesListScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+
+  // Robuste Theme-Auflösung mit Fallback auf Blau
+  const rawTheme =
+    (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
+    Themes.blue[colorScheme ?? "light"];
+
+  const theme = {
+    ...Themes.blue[colorScheme ?? "light"],
+    ...rawTheme,
+  };
 
   const {
     notes,

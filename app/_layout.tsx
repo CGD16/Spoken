@@ -4,7 +4,8 @@ import { Slot, usePathname, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import SidebarNavigation from "@/components/SidebarNavigation";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-import { Colors } from "@/constants/Colors";
+// import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type TabKey =
@@ -42,12 +43,15 @@ function MainLayout() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
 
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  const isDark = colorScheme === "dark";
+  // Hier wird themeName jetzt sauber mitgeladen:
+  const { colorScheme, themeName, isDark } = useColorScheme();
+
+  // Und hier wird es korrekt verwendet:
+  const theme = ((Themes as any)[themeName] ?? Themes.blue)[
+    colorScheme ?? "light"
+  ];
 
   const { isLoading } = useAuth();
-
   const activeTab = PATH_TO_TAB[pathname] ?? "notes";
 
   if (isLoading) {

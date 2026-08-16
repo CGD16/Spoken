@@ -13,12 +13,12 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleDarkMode: () => {},
 });
 
+// WICHTIG: Als benannter Export deklariert
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useRNColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === "dark");
 
   useEffect(() => {
-    // Gespeicherten Zustand beim Start laden
     AsyncStorage.getItem("@setting_dark_mode").then((val) => {
       if (val !== null) {
         setIsDarkMode(JSON.parse(val));
@@ -38,5 +38,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Wir exportieren es so, dass dein use-color-scheme Hook darauf zugreifen kann
 export const useAppTheme = () => useContext(ThemeContext);

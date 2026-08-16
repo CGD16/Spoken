@@ -1,4 +1,4 @@
-// app/_layout.tsx
+// app/(tabs)/_layout.tsx
 import {
   DarkTheme,
   DefaultTheme,
@@ -29,7 +29,7 @@ function RootNavigator() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, 
+        headerShown: false,
       }}
     >
       <Stack.Protected guard={!!session}>
@@ -45,12 +45,12 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const { colorScheme, isDark } = useColorScheme();
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
         <RootNavigator />
-        <StatusBar style="auto" />
+        <StatusBar style={isDark ? "light" : "dark"} />
       </ThemeProvider>
     </AuthProvider>
   );

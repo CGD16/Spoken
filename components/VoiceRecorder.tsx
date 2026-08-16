@@ -8,7 +8,7 @@ import {
 } from "expo-audio";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors } from "@/constants/Colors";
+import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
@@ -16,8 +16,10 @@ type Props = {
 };
 
 export default function VoiceRecorder({ onRecordingComplete }: Props) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const { colorScheme, themeName } = useColorScheme();
+  const theme =
+    Themes[themeName as keyof typeof Themes]?.[colorScheme] ??
+    Themes.blue[colorScheme];
   const isDark = colorScheme === "dark";
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
