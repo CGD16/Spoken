@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+import "@/lib/i18n";
+
 type TabKey =
   | "notes"
   | "categories"

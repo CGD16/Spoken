@@ -11,10 +11,12 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function SettingsScreen() {
+  const { t, i18n } = useTranslation();
   const { colorScheme, themeName, setTheme } = useColorScheme();
 
   // Robuste Theme-Auflösung mit Fallback auf Blau
@@ -29,18 +31,20 @@ export default function SettingsScreen() {
 
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === "dark");
   const [currentThemeName, setCurrentThemeName] = useState(themeName);
-  const [language, setLanguage] = useState<"de" | "en">("de");
+  const [language, setLanguage] = useState<"de" | "en">(
+    (i18n.language as "de" | "en") || "de",
+  );
+
+  // 1. FEHLER BEHOBEN: useState-Syntax korrigiert
   const [dateFormat, setDateFormat] = useState<
     "DD.MM.YYYY" | "YYYY-MM-DD" | "MM/DD/YYYY"
   >("DD.MM.YYYY");
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">("24h");
 
-  // Alle Einstellungen beim Start laden
   useEffect(() => {
     loadSettings();
   }, []);
 
-  // Synchronisieren, falls sich der Zustand von außen ändert
   useEffect(() => {
     setIsDarkMode(colorScheme === "dark");
     setCurrentThemeName(themeName);
@@ -52,7 +56,10 @@ export default function SettingsScreen() {
       const savedDate = await AsyncStorage.getItem("@setting_date_format");
       const savedTime = await AsyncStorage.getItem("@setting_time_format");
 
-      if (savedLang) setLanguage(savedLang as "de" | "en");
+      if (savedLang) {
+        setLanguage(savedLang as "de" | "en");
+        await i18n.changeLanguage(savedLang);
+      }
       if (savedDate) setDateFormat(savedDate as any);
       if (savedTime) setTimeFormat(savedTime as any);
     } catch (e) {
@@ -85,9 +92,11 @@ export default function SettingsScreen() {
     await setTheme(newThemeName, activeColorScheme);
   };
 
-  const handleLanguageChange = (lang: "de" | "en") => {
+  // 2. OPTIMIERUNG: i18n.changeLanguage ist async
+  const handleLanguageChange = async (lang: "de" | "en") => {
     setLanguage(lang);
-    saveSetting("@setting_language", lang);
+    await saveSetting("@setting_language", lang);
+    await i18n.changeLanguage(lang);
   };
 
   const handleDateFormatChange = (
@@ -103,12 +112,18 @@ export default function SettingsScreen() {
   };
 
   const themeOptions = [
-    { label: "Blau (Standard)", value: "blue", color: "#2f95dc" },
-    { label: "Rosa", value: "pink", color: "#e64980" },
-    { label: "Grün", value: "green", color: "#2b8a3e" },
-    { label: "Rot", value: "red", color: "#e03131" },
-    { label: "Gelb", value: "yellow", color: "#f59f00" },
-    { label: "Violett", value: "violet", color: "#9c36b5" },
+    { label: t("settings.themes.blue"), value: "blue", color: "#2f95dc" },
+    { label: t("settings.themes.pink"), value: "pink", color: "#e64980" },
+    { label: t("settings.themes.green"), value: "green", color: "#2b8a3e" },
+    { label: t("settings.themes.red"), value: "red", color: "#e03131" },
+    { label: t("settings.themes.yellow"), value: "yellow", color: "#f59f00" },
+    { label: t("settings.themes.violet"), value: "violet", color: "#9c36b5" },
+  ];
+
+  const dateFormatOptions = [
+    { label: t("settings.dateFormats.ddmmyyyy"), value: "DD.MM.YYYY" },
+    { label: t("settings.dateFormats.yyyymmdd"), value: "YYYY-MM-DD" },
+    { label: t("settings.dateFormats.mmddyyyy"), value: "MM/DD/YYYY" },
   ];
 
   return (
@@ -116,11 +131,13 @@ export default function SettingsScreen() {
       style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
     >
-      <Text style={[styles.header, { color: theme.text }]}>Einstellungen</Text>
+      <Text style={[styles.header, { color: theme.text }]}>
+        {t("settings.title")}
+      </Text>
 
       {/* Erscheinungsbild */}
       <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
-        Erscheinungsbild
+        {t("settings.appearance")}
       </Text>
       <View
         style={[
@@ -136,7 +153,7 @@ export default function SettingsScreen() {
               color={isDarkMode ? theme.textMuted : theme.text}
             />
             <Text style={[styles.rowLabel, { color: theme.text }]}>
-              Dunkelmodus (Dark Mode)
+              {t("settings.darkMode")}
             </Text>
           </View>
           <Switch
@@ -150,7 +167,7 @@ export default function SettingsScreen() {
 
       {/* Farbthema */}
       <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
-        Farbthema
+        {t("settings.colorTheme")}
       </Text>
       <View
         style={[
@@ -195,7 +212,7 @@ export default function SettingsScreen() {
 
       {/* Sprache */}
       <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
-        Sprache
+        {t("settings.language")}
       </Text>
       <View
         style={[
@@ -211,7 +228,7 @@ export default function SettingsScreen() {
           onPress={() => handleLanguageChange("de")}
         >
           <Text style={[styles.optionLabel, { color: theme.text }]}>
-            Deutsch
+            {t("settings.languages.de")}
           </Text>
           {language === "de" && (
             <Feather name="check" size={18} color={theme.primary} />
@@ -230,7 +247,7 @@ export default function SettingsScreen() {
           onPress={() => handleLanguageChange("en")}
         >
           <Text style={[styles.optionLabel, { color: theme.text }]}>
-            English
+            {t("settings.languages.en")}
           </Text>
           {language === "en" && (
             <Feather name="check" size={18} color={theme.primary} />
@@ -240,7 +257,7 @@ export default function SettingsScreen() {
 
       {/* Datumsformat */}
       <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
-        Datumsformat
+        {t("settings.dateFormat")}
       </Text>
       <View
         style={[
@@ -248,11 +265,7 @@ export default function SettingsScreen() {
           { backgroundColor: theme.surface, borderColor: theme.border },
         ]}
       >
-        {[
-          { label: "DD.MM.YYYY (z. B. 12.08.2026)", value: "DD.MM.YYYY" },
-          { label: "YYYY-MM-DD (z. B. 2026-08-12)", value: "YYYY-MM-DD" },
-          { label: "MM/DD/YYYY (z. B. 08/12/2026)", value: "MM/DD/YYYY" },
-        ].map((item, index) => (
+        {dateFormatOptions.map((item, index) => (
           <View key={item.value}>
             {index > 0 && (
               <View
@@ -281,7 +294,7 @@ export default function SettingsScreen() {
 
       {/* Uhrzeitformat */}
       <Text style={[styles.sectionTitle, { color: theme.textSubtle }]}>
-        Uhrzeitformat
+        {t("settings.timeFormat")}
       </Text>
       <View
         style={[
@@ -297,7 +310,7 @@ export default function SettingsScreen() {
           onPress={() => handleTimeFormatChange("24h")}
         >
           <Text style={[styles.optionLabel, { color: theme.text }]}>
-            24-Stunden (11:14)
+            {t("settings.timeFormats.24h")}
           </Text>
           {timeFormat === "24h" && (
             <Feather name="check" size={18} color={theme.primary} />
@@ -316,7 +329,7 @@ export default function SettingsScreen() {
           onPress={() => handleTimeFormatChange("12h")}
         >
           <Text style={[styles.optionLabel, { color: theme.text }]}>
-            12-Stunden (11:14 AM)
+            {t("settings.timeFormats.12h")}
           </Text>
           {timeFormat === "12h" && (
             <Feather name="check" size={18} color={theme.primary} />

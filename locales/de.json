@@ -1,0 +1,32 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "appearance": "Erscheinungsbild",
+    "darkMode": "Dunkelmodus (Dark Mode)",
+    "colorTheme": "Farbthema",
+    "language": "Sprache",
+    "dateFormat": "Datumsformat",
+    "timeFormat": "Uhrzeitformat",
+    "themes": {
+      "blue": "Blau (Standard)",
+      "pink": "Rosa",
+      "green": "Grün",
+      "red": "Rot",
+      "yellow": "Gelb",
+      "violet": "Violett"
+    },
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "dateFormats": {
+      "ddmmyyyy": "TT.MM.JJJJ (z. B. 12.08.2026)",
+      "yyyymmdd": "JJJJ-MM-TT (z. B. 2026-08-12)",
+      "mmddyyyy": "MM/TT/JJJJ (z. B. 08/12/2026)"
+    },
+    "timeFormats": {
+      "24h": "24-Stunden (11:14)",
+      "12h": "12-Stunden (11:14 AM)"
+    }
+  }
+}

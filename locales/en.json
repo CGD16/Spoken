@@ -1,0 +1,32 @@
+{
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "darkMode": "Dark Mode",
+    "colorTheme": "Color Theme",
+    "language": "Language",
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format",
+    "themes": {
+      "blue": "Blue (Default)",
+      "pink": "Pink",
+      "green": "Green",
+      "red": "Red",
+      "yellow": "Yellow",
+      "violet": "Violet"
+    },
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "dateFormats": {
+      "ddmmyyyy": "DD.MM.YYYY (e.g. 12.08.2026)",
+      "yyyymmdd": "YYYY-MM-DD (e.g. 2026-08-12)",
+      "mmddyyyy": "MM/DD/YYYY (e.g. 08/12/2026)"
+    },
+    "timeFormats": {
+      "24h": "24-Hour (11:14)",
+      "12h": "12-Hour (11:14 AM)"
+    }
+  }
+}
