@@ -1,9 +1,10 @@
-// app/categories.tsx
 import { View, Text, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function CategoriesScreen() {
+  const { t } = useTranslation();
   const { colorScheme, themeName } = useColorScheme();
 
   // Robuste Theme-Auflösung mit Fallback auf Blau
@@ -18,9 +19,11 @@ export default function CategoriesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.text }]}>Kategorien</Text>
+      <Text style={[styles.title, { color: theme.text }]}>
+        {t("sidebar.categories", "Kategorien")}
+      </Text>
       <Text style={[styles.placeholder, { color: theme.textSubtle }]}>
-        Kommt in einer späteren Version.
+        {t("categories.comingSoon", "Kommt in einer späteren Version.")}
       </Text>
     </View>
   );

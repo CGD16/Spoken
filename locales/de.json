@@ -2,6 +2,19 @@
   "notes": {
     "emptyState": "Noch keine Notizen - tippe unten auf 🎤"
   },
+  "categories": {
+    "comingSoon": "Kommt in einer späteren Version."
+  },
+  "tags": {
+    "comingSoon": "Kommt in einer späteren Version."
+  },
+  "favorites": {
+    "emptyState": "Noch keine Favoriten vorhanden. Markiere Notizen mit dem Stern"
+  },
+  "trash": {
+    "comingSoon": "Kommt in einer späteren Version."
+  },
+
   "sidebar": {
     "notes": "Notizen",
     "categories": "Kategorien",
@@ -15,7 +28,6 @@
     "record": "Aufnehmen",
     "recording": "Aufnahme läuft..."
   },
-
   "settings": {
     "title": "Einstellungen",
     "appearance": "Erscheinungsbild",

@@ -2,6 +2,18 @@
   "notes": {
     "emptyState": "No notes yet - tap 🎤 below"
   },
+  "categories": {
+    "comingSoon": "Coming in a future release."
+  },
+  "tags": {
+    "comingSoon": "Coming in a future release."
+  },
+  "favorites": {
+    "emptyState": "No favorites yet. Star a note to add it here ⭐"
+  },
+  "trash": {
+    "comingSoon": "Coming in a future release."
+  },
   "sidebar": {
     "notes": "Notes",
     "categories": "Categories",

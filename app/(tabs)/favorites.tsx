@@ -1,4 +1,3 @@
-// app/(tabs)/favorites.tsx
 import { useState } from "react";
 import {
   View,
@@ -9,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useNotes } from "@/hooks/useNotes";
 import type { Note } from "@/types/note";
 import NoteCard from "@/components/NoteCard";
@@ -23,6 +23,7 @@ import { Themes } from "@/constants/Colors";
 
 export default function FavoritesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { colorScheme, themeName } = useColorScheme();
 
   // Robuste Theme-Auflösung mit Fallback auf Blau
@@ -119,7 +120,9 @@ export default function FavoritesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.header, { color: theme.text }]}>Favoriten</Text>
+      <Text style={[styles.header, { color: theme.text }]}>
+        {t("sidebar.favorites", "Favoriten")}
+      </Text>
       <FlatList
         data={favoriteNotes}
         keyExtractor={(item) => item.id}
@@ -133,7 +136,10 @@ export default function FavoritesScreen() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
         ListEmptyComponent={
           <Text style={[styles.empty, { color: theme.textSubtle }]}>
-            Noch keine Favoriten vorhanden. Markiere Notizen mit dem Stern ⭐
+            {t(
+              "favorites.emptyState",
+              "Noch keine Favoriten vorhanden. Markiere Notizen mit dem Stern ⭐",
+            )}
           </Text>
         }
         renderItem={({ item }) => (
@@ -196,9 +202,13 @@ export default function FavoritesScreen() {
 
       <ConfirmDialog
         visible={!!deleteTargetId}
-        title="Notiz löschen?"
-        message="Möchtest du diese Notiz wirklich löschen?"
-        confirmLabel="Löschen"
+        title={t("notes.deleteTitle", "Notiz löschen?")}
+        message={t(
+          "notes.deleteMessage",
+          "Möchtest du diese Notiz wirklich löschen?",
+        )}
+        confirmLabel={t("notes.deleteConfirm", "Löschen")}
+        cancelLabel={t("notes.deleteCancel", "Abbrechen")}
         destructive
         onConfirm={confirmDelete}
         onCancel={() => {
