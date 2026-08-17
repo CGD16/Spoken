@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -22,22 +23,21 @@ type TabKey =
 
 type NavItem = {
   key: TabKey;
-  label: string;
   icon: keyof typeof Feather.glyphMap;
 };
 
+// Schlanke Array-Definition ohne doppelte oder unschöne Strings
 const MAIN_ITEMS: NavItem[] = [
-  { key: "notes", label: "Notizen", icon: "file-text" },
-  { key: "categories", label: "Kategorien", icon: "grid" },
-  { key: "tags", label: "Tags", icon: "tag" },
-  { key: "favorites", label: "Favoriten", icon: "star" },
-  { key: "search", label: "Suche", icon: "search" },
-  { key: "trash", label: "Papierkorb", icon: "trash-2" },
+  { key: "notes", icon: "file-text" },
+  { key: "categories", icon: "grid" },
+  { key: "tags", icon: "tag" },
+  { key: "favorites", icon: "star" },
+  { key: "search", icon: "search" },
+  { key: "trash", icon: "trash-2" },
 ];
 
 const FOOTER_ITEM: NavItem = {
   key: "settings",
-  label: "Einstellungen",
   icon: "settings",
 };
 
@@ -55,9 +55,9 @@ export default function SidebarNavigation({
   onTabChange,
   defaultCollapsed = false,
 }: Props) {
+  const { t } = useTranslation();
   const { colorScheme, themeName } = useColorScheme();
 
-  // Sichere Auflösung des Themes mit Fallback auf Blau (verhindert undefined properties)
   const rawTheme =
     (Themes as any)[themeName]?.[colorScheme ?? "light"] ??
     Themes.blue[colorScheme ?? "light"];
@@ -142,7 +142,7 @@ export default function SidebarNavigation({
                     },
                   ]}
                 >
-                  {item.label}
+                  {t(`sidebar.${item.key}`)}
                 </Text>
               )}
             </View>

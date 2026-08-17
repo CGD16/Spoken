@@ -20,6 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export default function RecordButton({ onRecordingComplete }: Props) {
+  const { t } = useTranslation();
   const { colorScheme, themeName } = useColorScheme();
 
   // Robuste Theme-Auflösung mit Fallback auf Blau
@@ -200,7 +202,9 @@ export default function RecordButton({ onRecordingComplete }: Props) {
           ]}
         >
           <Text style={[styles.label, { color: theme.text }]}>
-            {isRecording ? "Aufnahme läuft..." : "Aufnehmen"}
+            {isRecording
+              ? t("recorder.recording", "Aufnahme läuft...")
+              : t("recorder.record", "Aufnehmen")}
           </Text>
 
           <Animated.View

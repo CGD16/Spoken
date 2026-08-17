@@ -1,4 +1,3 @@
-// app/(tabs)/index.tsx
 import { useState } from "react";
 import {
   View,
@@ -9,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useNotes } from "@/hooks/useNotes";
 import type { Note } from "@/types/note";
 import NoteCard from "@/components/NoteCard";
@@ -24,6 +24,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function NotesListScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { colorScheme, themeName } = useColorScheme();
 
   // Robuste Theme-Auflösung mit Fallback auf Blau
@@ -148,7 +149,9 @@ export default function NotesListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.header, { color: theme.text }]}>Notizen</Text>
+      <Text style={[styles.header, { color: theme.text }]}>
+        {t("sidebar.notes")}
+      </Text>
       <FlatList
         data={notes}
         keyExtractor={(item) => item.id}
@@ -162,7 +165,7 @@ export default function NotesListScreen() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 100 }}
         ListEmptyComponent={
           <Text style={[styles.empty, { color: theme.textSubtle }]}>
-            Noch keine Notizen - tippe unten auf 🎤
+            {t("notes.emptyState", "Noch keine Notizen - tippe unten auf 🎤")}
           </Text>
         }
         renderItem={({ item }) => (
@@ -229,9 +232,13 @@ export default function NotesListScreen() {
 
       <ConfirmDialog
         visible={!!deleteTargetId}
-        title="Notiz löschen?"
-        message="Möchtest du diese Notiz wirklich löschen?"
-        confirmLabel="Löschen"
+        title={t("notes.deleteTitle", "Notiz löschen?")}
+        message={t(
+          "notes.deleteMessage",
+          "Möchtest du diese Notiz wirklich löschen?",
+        )}
+        confirmLabel={t("notes.deleteConfirm", "Löschen")}
+        cancelLabel={t("notes.deleteCancel", "Abbrechen")}
         destructive
         onConfirm={confirmDelete}
         onCancel={() => {

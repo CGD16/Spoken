@@ -1,4 +1,21 @@
 {
+  "notes": {
+    "emptyState": "Noch keine Notizen - tippe unten auf 🎤"
+  },
+  "sidebar": {
+    "notes": "Notizen",
+    "categories": "Kategorien",
+    "tags": "Tags",
+    "favorites": "Favoriten",
+    "search": "Suche",
+    "trash": "Papierkorb",
+    "settings": "Einstellungen"
+  },
+  "recorder": {
+    "record": "Aufnehmen",
+    "recording": "Aufnahme läuft..."
+  },
+
   "settings": {
     "title": "Einstellungen",
     "appearance": "Erscheinungsbild",

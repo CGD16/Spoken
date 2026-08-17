@@ -1,14 +1,13 @@
-// app/_layout.tsx
+import "@/lib/i18n";
+
 import { View, useWindowDimensions, ActivityIndicator } from "react-native";
 import { Slot, usePathname, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useTranslation } from "react-i18next";
 import SidebarNavigation from "@/components/SidebarNavigation";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-// import { Colors } from "@/constants/Colors";
 import { Themes } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
-import "@/lib/i18n";
 
 type TabKey =
   | "notes"
@@ -45,10 +44,9 @@ function MainLayout() {
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
 
-  // Hier wird themeName jetzt sauber mitgeladen:
+  const { i18n } = useTranslation();
   const { colorScheme, themeName, isDark } = useColorScheme();
 
-  // Und hier wird es korrekt verwendet:
   const theme = ((Themes as any)[themeName] ?? Themes.blue)[
     colorScheme ?? "light"
   ];
@@ -71,7 +69,10 @@ function MainLayout() {
         onTabChange={(tab) => router.push(TAB_TO_PATH[tab] as any)}
         defaultCollapsed={!isWide}
       />
-      <View style={[styles.content, { backgroundColor: theme.background }]}>
+      <View
+        key={i18n.language}
+        style={[styles.content, { backgroundColor: theme.background }]}
+      >
         <Slot />
       </View>
       <StatusBar style={isDark ? "light" : "dark"} />

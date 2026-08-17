@@ -1,4 +1,20 @@
 {
+  "notes": {
+    "emptyState": "No notes yet - tap 🎤 below"
+  },
+  "sidebar": {
+    "notes": "Notes",
+    "categories": "Categories",
+    "tags": "Tags",
+    "favorites": "Favorites",
+    "search": "Search",
+    "trash": "Trash",
+    "settings": "Settings"
+  },
+  "recorder": {
+    "record": "Record",
+    "recording": "Recording..."
+  },  
   "settings": {
     "title": "Settings",
     "appearance": "Appearance",
